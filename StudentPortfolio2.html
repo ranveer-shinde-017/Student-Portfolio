@@ -3,337 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Alex Rivera · Portfolio</title>
+  <title>Student Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet"/>
 
-  <!-- Firebase SDKs (ESM) -->
-  <script type="module">
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, set, get }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    /* ─────────────────────────────────────────────────
-       🔧  FIREBASE CONFIG  –  fill in your values from:
-       Firebase Console ▸ Project Settings ▸ Your apps ▸ SDK setup & config
-    ───────────────────────────────────────────────── */
-    const firebaseConfig = {
-      apiKey:            "YOUR_API_KEY",
-      authDomain:        "student-portfolio-f7e64.firebaseapp.com",
-      databaseURL:       "https://student-portfolio-f7e64-default-rtdb.firebaseio.com",
-      projectId:         "student-portfolio-f7e64",
-      storageBucket:     "student-portfolio-f7e64.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId:             "YOUR_APP_ID"
-    };
-
-    /* Hard-coded admin — only this email can edit */
-    const ADMIN_EMAIL = "ranveer.shinde.work@gmail.com";
-
-    /* ── Default data (seeded to Firebase on first run) ── */
-    const DEFAULT = {
-      hero:{
-        name:"Alex Rivera", highlight:"Rivera",
-        eyebrow:"Computer Science Student",
-        subtitle:"Building full-stack products and open-source tools. Passionate about developer experience, AI interfaces, and systems that scale.",
-        availability:"Open to Internships · Summer 2025"
-      },
-      avatar:{
-        initials:"AR", name:"Alex Rivera",
-        role:"Junior @ Massachusetts Institute of Technology",
-        location:"Cambridge, MA · UTC−5", gpa:"3.92 GPA · Dean's List",
-        status:"Available for remote work",
-        email:"alex@mit.edu", linkedin:"/in/alexrivera", github:"@alexrivera"
-      },
-      stats:{
-        s1_val:"12k+",s1_lbl:"lines shipped",
-        s2_val:"3",   s2_lbl:"internships",
-        s3_val:"533", s3_lbl:"github stars",
-        s4_val:"8",   s4_lbl:"open source PRs"
-      },
-      experience:[
-        {role:"Frontend Engineering Intern",company:"Stripe",   period:"May 2024 – Aug 2024", desc:"Built internal dashboard components used by 200+ ops agents. Reduced page load time by 38% via lazy loading & code splitting.", accent:"#635BFF"},
-        {role:"Research Assistant",          company:"MIT CSAIL",period:"Sep 2023 – Dec 2023", desc:"Contributed to NLP pipeline for multilingual sentiment analysis. Processed 4M+ tweet corpus using Python & HuggingFace.",    accent:"#A31F34"},
-        {role:"Open Source Contributor",     company:"Chakra UI",period:"Jan 2023 – Present",  desc:"Merged 12 PRs improving accessibility across core components. Maintained documentation for 3 major version releases.",         accent:"#68D391"}
-      ],
-      projects:[
-        {name:"Synapse",    color:"#a78bfa",stars:284,desc:"AI-powered note-taking app with semantic search & graph visualization of ideas.",  tags:"React,Python,OpenAI"},
-        {name:"Driftboard", color:"#34d399",stars:156,desc:"Real-time collaborative Kanban with presence indicators & conflict resolution.",   tags:"Next.js,Redis,WebSockets"},
-        {name:"Carta CLI",  color:"#fb923c",stars:93, desc:"Terminal-first expense tracker with GPT categorization & CSV export.",            tags:"Node.js,SQLite,OpenAI"}
-      ],
-      education:[
-        {icon:"🎓",school:"MIT",          degree:"B.S. Computer Science & AI",        year:"Class of 2026",   bg:"#0d1a30"},
-        {icon:"🏫",school:"Coursera / edX",degree:"ML Specialization · Deep Learning",year:"2023 · Andrew Ng",bg:"#1a100d"}
-      ]
-    };
-
-    /* ═══════════════ APP BOOTSTRAP ═══════════════ */
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getDatabase(app);
-
-    let isAdmin = false;
-    let editMode = false;
-    let data = null;
-
-    /* expose helpers to inline onclick attrs */
-    window._googleSignIn = async () => {
-      try {
-        const p = new GoogleAuthProvider();
-        p.setCustomParameters({prompt:"select_account"});
-        await signInWithPopup(auth, p);
-      } catch(e){ toast("Sign-in failed: "+e.message,"error"); }
-    };
-    window._signOut = async () => { editMode=false; await signOut(auth); };
-    window._toggleEdit = () => { if(!isAdmin) return; editMode=!editMode; render(); renderBar(auth.currentUser); };
-    window._cancelEdit = () => { editMode=false; render(); renderBar(auth.currentUser); };
-    window._saveAll   = saveAll;
-
-    /* ── Auth state ── */
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        isAdmin = user.email === ADMIN_EMAIL;
-        showApp(user);
-      } else {
-        isAdmin=false; editMode=false;
-        document.getElementById("login-screen").style.display="flex";
-        document.getElementById("app").style.display="none";
-        document.getElementById("admin-bar").innerHTML="";
-      }
-    });
-
-    async function showApp(user) {
-      document.getElementById("login-screen").style.display="none";
-      document.getElementById("app").style.display="block";
-      /* seed defaults if DB is empty */
-      const snap = await get(ref(db,"portfolio"));
-      if (!snap.exists()) await set(ref(db,"portfolio"), DEFAULT);
-      /* live listener */
-      onValue(ref(db,"portfolio"), snap => {
-        data = snap.val() || DEFAULT;
-        render();
-        renderBar(user);
-      });
-    }
-
-    /* ════════════ SAVE ════════════ */
-    async function saveAll() {
-      if (!isAdmin) return;
-      try {
-        data.hero.name         = val("e-hero-name");
-        data.hero.highlight    = val("e-hero-hl");
-        data.hero.eyebrow      = val("e-hero-eyebrow");
-        data.hero.subtitle     = val("e-hero-sub");
-        data.hero.availability = val("e-avail");
-
-        data.avatar.initials = val("e-av-init");
-        data.avatar.name     = val("e-av-name");
-        data.avatar.role     = val("e-av-role");
-        data.avatar.location = val("e-av-loc");
-        data.avatar.gpa      = val("e-av-gpa");
-        data.avatar.status   = val("e-av-status");
-        data.avatar.email    = val("e-av-email");
-        data.avatar.linkedin = val("e-av-linkedin");
-        data.avatar.github   = val("e-av-github");
-
-        ["s1","s2","s3","s4"].forEach(k => {
-          data.stats[k+"_val"] = val("e-"+k+"-val");
-          data.stats[k+"_lbl"] = val("e-"+k+"-lbl");
-        });
-
-        data.experience = data.experience.map((_,i) => ({
-          role:   val(`e-exp-role-${i}`),
-          company:val(`e-exp-co-${i}`),
-          period: val(`e-exp-per-${i}`),
-          desc:   val(`e-exp-desc-${i}`),
-          accent: data.experience[i].accent
-        }));
-
-        data.projects = data.projects.map((p,i) => ({
-          name: val(`e-proj-name-${i}`),
-          desc: val(`e-proj-desc-${i}`),
-          tags: val(`e-proj-tags-${i}`),
-          stars:parseInt(val(`e-proj-stars-${i}`))||p.stars,
-          color:p.color
-        }));
-
-        data.education = data.education.map((e,i) => ({
-          icon:  e.icon,
-          school:val(`e-edu-school-${i}`),
-          degree:val(`e-edu-deg-${i}`),
-          year:  val(`e-edu-year-${i}`),
-          bg:    e.bg
-        }));
-
-        await set(ref(db,"portfolio"), data);
-        toast("✓ Portfolio saved!","success");
-        editMode=false; renderBar(auth.currentUser);
-      } catch(e){ toast("Save failed: "+e.message,"error"); }
-    }
-
-    function val(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; }
-
-    /* ════════════ ADMIN BAR ════════════ */
-    function renderBar(user) {
-      document.getElementById("admin-bar").innerHTML = `
-        <div class="ab-left">
-          <img src="${user.photoURL||""}" class="ab-img" onerror="this.style.display='none'"/>
-          <span class="ab-name">${user.displayName||user.email}</span>
-          ${isAdmin
-            ? '<span class="ab-pill ab-admin">⚡ Admin</span>'
-            : '<span class="ab-pill ab-viewer">👁 Viewer</span>'}
-        </div>
-        <div class="ab-right">
-          ${isAdmin && !editMode ? `<button class="ab-btn ab-edit" onclick="_toggleEdit()">✏️ Edit Portfolio</button>` : ""}
-          ${isAdmin &&  editMode ? `<button class="ab-btn ab-save" onclick="_saveAll()">💾 Save Changes</button>` : ""}
-          ${isAdmin &&  editMode ? `<button class="ab-btn ab-cancel" onclick="_cancelEdit()">✕ Cancel</button>` : ""}
-          <button class="ab-btn ab-out" onclick="_signOut()">Sign Out</button>
-        </div>`;
-    }
-
-    /* ════════════ RENDER ════════════ */
-    function render() {
-      if (!data) return;
-      const E = editMode;
-      const fi = (id,v,ph="") => E
-        ? `<input class="ef" id="${id}" value="${x(v)}" placeholder="${ph}"/>`
-        : x(v);
-      const ta = (id,v) => E
-        ? `<textarea class="ef ef-ta" id="${id}">${x(v)}</textarea>`
-        : x(v);
-
-      /* ── hero ── */
-      set$("c-avail",   fi("e-avail",        data.hero.availability));
-      set$("c-eyebrow", fi("e-hero-eyebrow",  data.hero.eyebrow));
-      set$("c-hero-sub",ta("e-hero-sub",      data.hero.subtitle));
-      if (E) {
-        set$("c-heroname",
-          `<input class="ef ef-bigname" id="e-hero-name" value="${x(data.hero.name)}"/>` +
-          `<div class="ef-hint">Highlighted word: <input class="ef ef-sm" id="e-hero-hl" value="${x(data.hero.highlight)}"/></div>`);
-      } else {
-        const hl  = data.hero.highlight || data.hero.name.split(" ").pop();
-        const txt = data.hero.name.replace(hl,`<span>${hl}</span>`);
-        set$("c-heroname", txt);
-      }
-
-      /* ── avatar ── */
-      set$("c-av-init",    fi("e-av-init",   data.avatar.initials));
-      set$("c-av-name",    fi("e-av-name",   data.avatar.name));
-      set$("c-av-role",    fi("e-av-role",   data.avatar.role));
-      set$("c-av-loc",     fi("e-av-loc",    data.avatar.location));
-      set$("c-av-gpa",     fi("e-av-gpa",    data.avatar.gpa));
-      set$("c-av-status",  fi("e-av-status", data.avatar.status));
-      set$("c-av-email",   fi("e-av-email",  data.avatar.email));
-      set$("c-av-linkedin",fi("e-av-linkedin",data.avatar.linkedin));
-      set$("c-av-github",  fi("e-av-github", data.avatar.github));
-      const emailEl = document.getElementById("c-link-email");
-      if (emailEl && !E) emailEl.href = "mailto:"+data.avatar.email;
-
-      /* ── stats ── */
-      ["s1","s2","s3","s4"].forEach(k => {
-        set$("c-"+k+"-val", fi("e-"+k+"-val", data.stats[k+"_val"]));
-        set$("c-"+k+"-lbl", fi("e-"+k+"-lbl", data.stats[k+"_lbl"]));
-      });
-
-      /* ── experience ── */
-      const expEl = document.getElementById("exp-list");
-      expEl.innerHTML = "";
-      let openExp = null;
-      (data.experience||[]).forEach((exp,i) => {
-        const item = document.createElement("div");
-        item.className="exp-item"; item.id="ei-"+i;
-        item.innerHTML = `
-          <div class="exp-dot-col">
-            <div class="exp-dot" id="edot-${i}" style="border-color:${exp.accent}"></div>
-            ${i<data.experience.length-1?'<div class="exp-line"></div>':""}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div class="exp-period">${E?`<input class="ef ef-sm" id="e-exp-per-${i}" value="${x(exp.period)}"/>`:x(exp.period)}</div>
-            <div class="exp-role">${E?`<input class="ef" id="e-exp-role-${i}" value="${x(exp.role)}"/>`:x(exp.role)}</div>
-            <div class="exp-co">${E?`<input class="ef ef-sm" id="e-exp-co-${i}" value="${x(exp.company)}"/>`:x(exp.company)}</div>
-            <div class="exp-desc${E?' open':''}" id="edesc-${i}">${E?`<textarea class="ef ef-ta" id="e-exp-desc-${i}">${x(exp.desc)}</textarea>`:x(exp.desc)}</div>
-          </div>`;
-        if (!E) {
-          item.addEventListener("click", () => {
-            const was = openExp===i;
-            data.experience.forEach((_,j) => {
-              document.getElementById("edesc-"+j)?.classList.remove("open");
-              document.getElementById("ei-"+j)?.classList.remove("active");
-              const d=document.getElementById("edot-"+j);
-              if(d){d.style.background="transparent";d.style.boxShadow="none";}
-            });
-            if (!was) {
-              document.getElementById("edesc-"+i)?.classList.add("open");
-              item.classList.add("active");
-              const d=document.getElementById("edot-"+i);
-              if(d){d.style.background=exp.accent;d.style.boxShadow=`0 0 6px ${exp.accent}88`;}
-              openExp=i;
-            } else openExp=null;
-          });
-        }
-        expEl.appendChild(item);
-      });
-
-      /* ── projects ── */
-      const projEl = document.getElementById("proj-list");
-      projEl.innerHTML = "";
-      (data.projects||[]).forEach((p,i) => {
-        const c = document.createElement("div");
-        c.className="proj-card"; c.style.setProperty("--pc",p.color);
-        c.innerHTML = `
-          <div class="proj-hdr">
-            <div class="proj-name" style="color:${p.color}">${E?`<input class="ef" id="e-proj-name-${i}" value="${x(p.name)}"/>`:x(p.name)}</div>
-            <div class="proj-stars">★ ${E?`<input class="ef ef-tiny" id="e-proj-stars-${i}" value="${p.stars}"/>`:p.stars}</div>
-          </div>
-          <div class="proj-desc">${E?`<textarea class="ef ef-ta" id="e-proj-desc-${i}">${x(p.desc)}</textarea>`:x(p.desc)}</div>
-          ${E
-            ? `<div class="ef-hint">Tags (comma-separated)</div><input class="ef ef-sm" id="e-proj-tags-${i}" value="${x(p.tags)}"/>`
-            : `<div class="proj-tags">${(p.tags||"").split(",").map(t=>`<span class="proj-tag">${t.trim()}</span>`).join("")}</div>`}`;
-        projEl.appendChild(c);
-      });
-
-      /* ── education ── */
-      const eduEl = document.getElementById("edu-wrap");
-      eduEl.innerHTML = "";
-      (data.education||[]).forEach((e,i) => {
-        const item = document.createElement("div");
-        item.className="edu-item";
-        item.innerHTML = `
-          <div class="edu-icon" style="background:${e.bg}">${e.icon}</div>
-          <div>
-            <div class="edu-school">${E?`<input class="ef" id="e-edu-school-${i}" value="${x(e.school)}"/>`:x(e.school)}</div>
-            <div class="edu-degree">${E?`<input class="ef ef-sm" id="e-edu-deg-${i}" value="${x(e.degree)}"/>`:x(e.degree)}</div>
-            <div class="edu-year">${E?`<input class="ef ef-sm" id="e-edu-year-${i}" value="${x(e.year)}"/>`:x(e.year)}</div>
-          </div>`;
-        eduEl.appendChild(item);
-      });
-
-      /* edit border */
-      document.querySelectorAll(".card").forEach(c => c.classList.toggle("editing",E));
-    }
-
-    function set$(id,html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
-    function x(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-    /* ── toast ── */
-    function toast(msg,type="info"){
-      const t=document.createElement("div");
-      t.className=`toast toast-${type}`; t.textContent=msg;
-      document.body.appendChild(t);
-      requestAnimationFrame(()=>t.classList.add("in"));
-      setTimeout(()=>{t.classList.remove("in");setTimeout(()=>t.remove(),350);},3000);
-    }
-  </script>
+  <!-- Firebase Compat (v9 compat layer — exposes window.firebase, no ESM needed) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     body { background:#080808; font-family:'Geist','Segoe UI',sans-serif; color:#e2e2e2; min-height:100vh; }
 
-    /* ══════════════ LOGIN ══════════════ */
+    /* ══ LOGIN ══ */
     #login-screen {
       display:flex; align-items:center; justify-content:center; min-height:100vh;
       background:#080808;
@@ -366,7 +50,7 @@
     .btn-g:hover { background:#e8e8e8; transform:scale(1.02); }
     .login-note { margin-top:1.25rem; font-family:'DM Mono',monospace; font-size:.62rem; color:#333; line-height:1.7; }
 
-    /* ══════════════ ADMIN BAR ══════════════ */
+    /* ══ ADMIN BAR ══ */
     #admin-bar {
       position:sticky; top:0; z-index:100;
       background:#0c0c0cee; border-bottom:1px solid #1a1a1a;
@@ -375,22 +59,22 @@
     }
     .ab-left  { display:flex; align-items:center; gap:.6rem; }
     .ab-right { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
-    .ab-img   { width:28px; height:28px; border-radius:50%; border:1px solid #2a2a2a; }
+    .ab-img   { width:28px; height:28px; border-radius:50%; border:1px solid #2a2a2a; object-fit:cover; }
     .ab-name  { font-family:'DM Mono',monospace; font-size:.76rem; color:#aaa; }
     .ab-pill  { font-family:'DM Mono',monospace; font-size:.6rem; padding:.15rem .5rem; border-radius:99px; }
     .ab-admin { background:#0d2015; border:1px solid #34d39922; color:#34d399; }
     .ab-viewer{ background:#1a1010; border:1px solid #ff444422; color:#f87171; }
     .ab-btn   { padding:.4rem .9rem; border-radius:8px; border:none; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .2s; }
     .ab-edit  { background:#1a1a2e; color:#a78bfa; border:1px solid #a78bfa33; }
-    .ab-edit:hover  { background:#252540; }
+    .ab-edit:hover   { background:#252540; }
     .ab-save  { background:#0d2015; color:#34d399; border:1px solid #34d39933; }
-    .ab-save:hover  { background:#142b1f; }
+    .ab-save:hover   { background:#142b1f; }
     .ab-cancel{ background:#1e1010; color:#f87171; border:1px solid #f8717133; }
-    .ab-cancel:hover{ background:#2a1414; }
+    .ab-cancel:hover { background:#2a1414; }
     .ab-out   { background:#1a1a1a; color:#666; border:1px solid #252525; }
-    .ab-out:hover   { color:#ccc; border-color:#333; }
+    .ab-out:hover    { color:#ccc; border-color:#333; }
 
-    /* ══════════════ PORTFOLIO ROOT ══════════════ */
+    /* ══ PORTFOLIO ROOT ══ */
     .p-root {
       min-height:100vh; background:#080808;
       background-image:
@@ -403,7 +87,7 @@
       display:grid; grid-template-columns:repeat(12,1fr); gap:.875rem;
     }
 
-    /* ══════════════ CARDS ══════════════ */
+    /* ══ CARDS ══ */
     .card {
       background:#111111; border:1px solid #1e1e1e; border-radius:20px;
       padding:1.5rem; position:relative; overflow:hidden;
@@ -412,8 +96,7 @@
       animation:fadeUp .55s ease forwards;
     }
     .card:hover   { border-color:#2e2e2e; transform:translateY(-2px); }
-    .card.editing { border-color:#a78bfa44!important; box-shadow:0 0 0 1px #a78bfa1a; }
-
+    .card.editing { border-color:#a78bfa44 !important; box-shadow:0 0 0 1px #a78bfa1a; }
     .c-hero    { grid-column:span 7; min-height:230px; }
     .c-avatar  { grid-column:span 5; min-height:230px; }
     .c-stats   { grid-column:span 4; }
@@ -421,7 +104,6 @@
     .c-exp     { grid-column:span 12; }
     .c-projects{ grid-column:span 7; }
     .c-contact { grid-column:span 5; }
-
     .card:nth-child(1){animation-delay:0ms}
     .card:nth-child(2){animation-delay:70ms}
     .card:nth-child(3){animation-delay:140ms}
@@ -429,9 +111,7 @@
     .card:nth-child(5){animation-delay:280ms}
     .card:nth-child(6){animation-delay:350ms}
     .card:nth-child(7){animation-delay:420ms}
-
     @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-
     .glow{position:absolute;width:130px;height:130px;border-radius:50%;filter:blur(65px);pointer-events:none;opacity:.15;}
 
     /* ── labels ── */
@@ -440,7 +120,7 @@
 
     /* ── avail badge ── */
     .avail{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .75rem;background:#0d2015;border:1px solid #34d39922;border-radius:99px;font-family:'DM Mono',monospace;font-size:.65rem;color:#34d399;margin-bottom:1rem;}
-    .dot{width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 5px #34d399;animation:pulse 2s infinite;}
+    .blink{width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 5px #34d399;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
     /* ── hero ── */
@@ -493,13 +173,14 @@
     .exp-desc.open{max-height:200px;}
 
     /* ── projects ── */
+    .proj-list{display:flex;flex-direction:column;gap:.6rem;}
     .proj-card{background:#141414;border:1px solid #1e1e1e;border-radius:14px;padding:1rem;cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
     .proj-card::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--pc);border-radius:14px 0 0 14px;opacity:0;transition:opacity .2s;}
     .proj-card:hover{border-color:#2e2e2e;transform:translateX(3px);}
     .proj-card:hover::after{opacity:1;}
     .proj-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;}
     .proj-name{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;}
-    .proj-stars{font-family:'DM Mono',monospace;font-size:.65rem;color:#555;display:flex;align-items:center;gap:.3rem;}
+    .proj-stars{font-family:'DM Mono',monospace;font-size:.65rem;color:#555;}
     .proj-desc{font-size:.76rem;color:#777;line-height:1.55;margin-bottom:.6rem;}
     .proj-tags{display:flex;gap:.35rem;flex-wrap:wrap;}
     .proj-tag{font-family:'DM Mono',monospace;font-size:.6rem;padding:.2rem .5rem;border-radius:6px;background:#1c1c1c;border:1px solid #252525;color:#666;}
@@ -518,14 +199,14 @@
     .clink-val{margin-left:auto;font-family:'DM Mono',monospace;font-size:.65rem;color:#444;}
     .clink svg{width:13px;height:13px;flex-shrink:0;}
 
-    /* ── edit-mode fields ── */
-    .ef{background:#0d0d0d;border:1px solid #a78bfa55;border-radius:6px;padding:.3rem .5rem;color:#e0e0e0;font-family:inherit;font-size:inherit;width:100%;outline:none;transition:border-color .2s;}
+    /* ── edit fields ── */
+    .ef{background:#0d0d0d;border:1px solid #a78bfa55;border-radius:6px;padding:.3rem .5rem;color:#e0e0e0;font-family:inherit;font-size:inherit;width:100%;outline:none;transition:border-color .2s;display:block;margin-top:2px;}
     .ef:focus{border-color:#a78bfa;}
     .ef-ta{min-height:56px;resize:vertical;line-height:1.6;font-size:.77rem;}
-    .ef-bigname{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.4rem;}
-    .ef-sm{font-size:.72rem;}
-    .ef-tiny{width:48px;text-align:center;}
-    .ef-hint{font-family:'DM Mono',monospace;font-size:.6rem;color:#555;margin-top:.3rem;margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem;}
+    .ef-bigname{font-family:'Syne',sans-serif!important;font-size:1.5rem!important;font-weight:800!important;margin-bottom:.4rem;}
+    .ef-sm{font-size:.72rem!important;}
+    .ef-tiny{width:52px!important;text-align:center;}
+    .ef-hint{font-family:'DM Mono',monospace;font-size:.6rem;color:#555;margin-top:.4rem;margin-bottom:.2rem;}
 
     /* ── toast ── */
     .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:.75rem 1.25rem;border-radius:12px;font-size:.82rem;font-weight:500;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;}
@@ -542,14 +223,14 @@
 </head>
 <body>
 
-<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<!-- ═══════ LOGIN ═══════ -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">AR</div>
     <div class="login-title">Portfolio Access</div>
-    <p class="login-sub">Sign in with Google to view this portfolio.<br/>Admin editing reserved for the portfolio owner.</p>
+    <p class="login-sub">Sign in with Google to view this portfolio.<br/>Admin editing is reserved for the portfolio owner.</p>
     <div class="login-rule">// authenticate to continue</div>
-    <button class="btn-g" onclick="_googleSignIn()">
+    <button class="btn-g" id="googleSignInBtn">
       <svg width="18" height="18" viewBox="0 0 48 48">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
         <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -562,22 +243,19 @@
   </div>
 </div>
 
-<!-- ═══════════════ APP ═══════════════ -->
+<!-- ═══════ APP ═══════ -->
 <div id="app" style="display:none">
-
-  <!-- sticky admin bar -->
   <div id="admin-bar"></div>
-
   <div class="p-root">
     <div class="grid">
 
       <!-- HERO -->
       <div class="card c-hero">
         <div class="glow" style="background:#a78bfa;top:-40px;right:-20px"></div>
-        <div class="avail"><div class="dot"></div><span id="c-avail"></span></div>
+        <div class="avail"><div class="blink"></div><span id="c-avail"></span></div>
         <div class="eyebrow"><span id="c-eyebrow"></span></div>
         <h1 class="heroname" id="c-heroname"></h1>
-        <div class="herosub" id="c-hero-sub"></div>
+        <div class="herosub" id="c-herosub"></div>
         <div class="actions">
           <a href="#" class="btn-p">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -654,7 +332,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
           Featured Projects
         </div>
-        <div class="proj-list" id="proj-list" style="display:flex;flex-direction:column;gap:.6rem"></div>
+        <div class="proj-list" id="proj-list"></div>
       </div>
 
       <!-- CONTACT + EDUCATION -->
@@ -682,34 +360,375 @@
         </div>
       </div>
 
-    </div><!-- /grid -->
-  </div><!-- /p-root -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
+<!-- ═══════ MAIN SCRIPT (regular — no type=module, so window scope works) ═══════ -->
 <script>
-  /* Static tools (design tokens – not DB-editable) */
-  const TOOLS=[
-    {name:"React",     color:"#61DAFB",bg:"#0d2a35",i:"R"},
-    {name:"Python",    color:"#FFD43B",bg:"#2b2200",i:"Py"},
-    {name:"TypeScript",color:"#3178C6",bg:"#0d1e38",i:"TS"},
-    {name:"Node.js",   color:"#68A063",bg:"#0d2015",i:"N"},
-    {name:"Figma",     color:"#F24E1E",bg:"#2d1008",i:"Fi"},
-    {name:"Docker",    color:"#2496ED",bg:"#082030",i:"Do"},
-    {name:"SQL",       color:"#E97627",bg:"#2a1500",i:"SQ"},
-    {name:"Git",       color:"#F05032",bg:"#2a0e08",i:"Gi"},
-    {name:"Tailwind",  color:"#38BDF8",bg:"#082028",i:"Tw"},
-    {name:"GraphQL",   color:"#E10098",bg:"#280018",i:"GQ"},
-    {name:"Redis",     color:"#FF4438",bg:"#2a0808",i:"Re"},
-    {name:"AWS",       color:"#FF9900",bg:"#2a1e00",i:"AW"},
-  ];
-  const tw = document.getElementById("tools-wrap");
-  TOOLS.forEach((t,idx)=>{
-    const el=document.createElement("div");
-    el.className="tb";
-    el.style.cssText=`background:${t.bg};border:1px solid ${t.color}22;animation-delay:${idx*45+320}ms`;
-    el.innerHTML=`<span class="ti" style="color:${t.color};box-shadow:0 0 8px ${t.color}44">${t.i}</span><span class="tn">${t.name}</span>`;
-    tw.appendChild(el);
+/* ─────────────────────────────────────────────────────────────
+   🔧  REPLACE THESE with your real values from:
+   Firebase Console → Project Settings → Your Apps → SDK config
+───────────────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "student-portfolio-f7e64.firebaseapp.com",
+  databaseURL:       "https://student-portfolio-f7e64-default-rtdb.firebaseio.com",
+  projectId:         "student-portfolio-f7e64",
+  storageBucket:     "student-portfolio-f7e64.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
+};
+
+const ADMIN_EMAIL = "ranveer.shinde.work@gmail.com";
+
+/* ── Default seed data ── */
+const DEFAULT = {
+  hero:{
+    name:"Alex Rivera", highlight:"Rivera",
+    eyebrow:"Computer Science Student",
+    subtitle:"Building full-stack products and open-source tools. Passionate about developer experience, AI interfaces, and systems that scale.",
+    availability:"Open to Internships · Summer 2025"
+  },
+  avatar:{
+    initials:"AR", name:"Alex Rivera",
+    role:"Junior @ Massachusetts Institute of Technology",
+    location:"Cambridge, MA · UTC−5", gpa:"3.92 GPA · Dean's List",
+    status:"Available for remote work",
+    email:"alex@mit.edu", linkedin:"/in/alexrivera", github:"@alexrivera"
+  },
+  stats:{
+    s1_val:"12k+", s1_lbl:"lines shipped",
+    s2_val:"3",    s2_lbl:"internships",
+    s3_val:"533",  s3_lbl:"github stars",
+    s4_val:"8",    s4_lbl:"open source PRs"
+  },
+  experience:[
+    {role:"Frontend Engineering Intern", company:"Stripe",    period:"May 2024 – Aug 2024", desc:"Built internal dashboard components used by 200+ ops agents. Reduced page load time by 38% via lazy loading & code splitting.", accent:"#635BFF"},
+    {role:"Research Assistant",          company:"MIT CSAIL", period:"Sep 2023 – Dec 2023", desc:"Contributed to NLP pipeline for multilingual sentiment analysis. Processed 4M+ tweet corpus using Python & HuggingFace.",    accent:"#A31F34"},
+    {role:"Open Source Contributor",     company:"Chakra UI", period:"Jan 2023 – Present",  desc:"Merged 12 PRs improving accessibility across core components. Maintained documentation for 3 major version releases.",         accent:"#68D391"}
+  ],
+  projects:[
+    {name:"Synapse",    color:"#a78bfa", stars:284, desc:"AI-powered note-taking app with semantic search & graph visualization of ideas.",  tags:"React,Python,OpenAI"},
+    {name:"Driftboard", color:"#34d399", stars:156, desc:"Real-time collaborative Kanban with presence indicators & conflict resolution.",   tags:"Next.js,Redis,WebSockets"},
+    {name:"Carta CLI",  color:"#fb923c", stars:93,  desc:"Terminal-first expense tracker with GPT categorization & CSV export.",            tags:"Node.js,SQLite,OpenAI"}
+  ],
+  education:[
+    {icon:"🎓", school:"MIT",           degree:"B.S. Computer Science & AI",        year:"Class of 2026",   bg:"#0d1a30"},
+    {icon:"🏫", school:"Coursera / edX", degree:"ML Specialization · Deep Learning", year:"2023 · Andrew Ng", bg:"#1a100d"}
+  ]
+};
+
+/* ── Tools (static, not DB-editable) ── */
+const TOOLS=[
+  {name:"React",     color:"#61DAFB",bg:"#0d2a35",i:"R"},
+  {name:"Python",    color:"#FFD43B",bg:"#2b2200",i:"Py"},
+  {name:"TypeScript",color:"#3178C6",bg:"#0d1e38",i:"TS"},
+  {name:"Node.js",   color:"#68A063",bg:"#0d2015",i:"N"},
+  {name:"Figma",     color:"#F24E1E",bg:"#2d1008",i:"Fi"},
+  {name:"Docker",    color:"#2496ED",bg:"#082030",i:"Do"},
+  {name:"SQL",       color:"#E97627",bg:"#2a1500",i:"SQ"},
+  {name:"Git",       color:"#F05032",bg:"#2a0e08",i:"Gi"},
+  {name:"Tailwind",  color:"#38BDF8",bg:"#082028",i:"Tw"},
+  {name:"GraphQL",   color:"#E10098",bg:"#280018",i:"GQ"},
+  {name:"Redis",     color:"#FF4438",bg:"#2a0808",i:"Re"},
+  {name:"AWS",       color:"#FF9900",bg:"#2a1e00",i:"AW"},
+];
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let db, auth, isAdmin = false, editMode = false, portData = null, openExp = null;
+
+/* ════════════════════════════════════════
+   FIREBASE INIT  (compat API — global scope)
+════════════════════════════════════════ */
+firebase.initializeApp(firebaseConfig);
+auth = firebase.auth();
+db   = firebase.database();
+
+/* ── Attach Google sign-in to button ── */
+document.getElementById("googleSignInBtn").addEventListener("click", async () => {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await auth.signInWithPopup(provider);
+  } catch(e) {
+    toast("Sign-in failed: " + e.message, "error");
+  }
+});
+
+/* ── Auth state listener ── */
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    isAdmin = user.email === ADMIN_EMAIL;
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    await seedIfEmpty();
+    db.ref("portfolio").on("value", snap => {
+      portData = snap.val() || DEFAULT;
+      render();
+      renderBar(user);
+    });
+  } else {
+    isAdmin = false; editMode = false;
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("admin-bar").innerHTML = "";
+  }
+});
+
+async function seedIfEmpty() {
+  const snap = await db.ref("portfolio").once("value");
+  if (!snap.exists()) await db.ref("portfolio").set(DEFAULT);
+}
+
+/* ════════════════════════════════════════
+   ADMIN BAR
+════════════════════════════════════════ */
+function renderBar(user) {
+  const bar = document.getElementById("admin-bar");
+  bar.innerHTML = `
+    <div class="ab-left">
+      <img src="${user.photoURL||""}" class="ab-img" onerror="this.style.display='none'"/>
+      <span class="ab-name">${user.displayName || user.email}</span>
+      ${isAdmin
+        ? '<span class="ab-pill ab-admin">⚡ Admin</span>'
+        : '<span class="ab-pill ab-viewer">👁 Viewer</span>'}
+    </div>
+    <div class="ab-right">
+      ${isAdmin && !editMode ? '<button class="ab-btn ab-edit" id="btn-edit">✏️ Edit Portfolio</button>' : ""}
+      ${isAdmin &&  editMode ? '<button class="ab-btn ab-save" id="btn-save">💾 Save Changes</button>' : ""}
+      ${isAdmin &&  editMode ? '<button class="ab-btn ab-cancel" id="btn-cancel">✕ Cancel</button>' : ""}
+      <button class="ab-btn ab-out" id="btn-signout">Sign Out</button>
+    </div>`;
+
+  document.getElementById("btn-signout")?.addEventListener("click", () => {
+    editMode = false; auth.signOut();
   });
+  document.getElementById("btn-edit")?.addEventListener("click", () => {
+    editMode = true; render(); renderBar(auth.currentUser);
+  });
+  document.getElementById("btn-cancel")?.addEventListener("click", () => {
+    editMode = false; render(); renderBar(auth.currentUser);
+  });
+  document.getElementById("btn-save")?.addEventListener("click", saveAll);
+}
+
+/* ════════════════════════════════════════
+   SAVE
+════════════════════════════════════════ */
+async function saveAll() {
+  if (!isAdmin) return;
+  try {
+    portData.hero.availability = g("e-avail");
+    portData.hero.eyebrow      = g("e-eyebrow");
+    portData.hero.name         = g("e-heroname");
+    portData.hero.highlight    = g("e-herohl");
+    portData.hero.subtitle     = g("e-herosub");
+
+    portData.avatar.initials = g("e-av-init");
+    portData.avatar.name     = g("e-av-name");
+    portData.avatar.role     = g("e-av-role");
+    portData.avatar.location = g("e-av-loc");
+    portData.avatar.gpa      = g("e-av-gpa");
+    portData.avatar.status   = g("e-av-status");
+    portData.avatar.email    = g("e-av-email");
+    portData.avatar.linkedin = g("e-av-linkedin");
+    portData.avatar.github   = g("e-av-github");
+
+    ["s1","s2","s3","s4"].forEach(k => {
+      portData.stats[k+"_val"] = g("e-"+k+"-val");
+      portData.stats[k+"_lbl"] = g("e-"+k+"-lbl");
+    });
+
+    portData.experience = portData.experience.map((ex,i) => ({
+      ...ex,
+      role:    g(`e-exp-role-${i}`),
+      company: g(`e-exp-co-${i}`),
+      period:  g(`e-exp-per-${i}`),
+      desc:    g(`e-exp-desc-${i}`)
+    }));
+
+    portData.projects = portData.projects.map((p,i) => ({
+      ...p,
+      name:  g(`e-proj-name-${i}`),
+      desc:  g(`e-proj-desc-${i}`),
+      tags:  g(`e-proj-tags-${i}`),
+      stars: parseInt(g(`e-proj-stars-${i}`)) || p.stars
+    }));
+
+    portData.education = portData.education.map((e,i) => ({
+      ...e,
+      school: g(`e-edu-school-${i}`),
+      degree: g(`e-edu-deg-${i}`),
+      year:   g(`e-edu-year-${i}`)
+    }));
+
+    await db.ref("portfolio").set(portData);
+    toast("✓ Portfolio saved!", "success");
+    editMode = false;
+    renderBar(auth.currentUser);
+  } catch(e) { toast("Save failed: " + e.message, "error"); }
+}
+
+function g(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+/* ════════════════════════════════════════
+   RENDER
+════════════════════════════════════════ */
+function render() {
+  if (!portData) return;
+  const E = editMode;
+
+  /* helpers */
+  const fi = (id, val, cls="") =>
+    E ? `<input class="ef ${cls}" id="${id}" value="${x(val)}"/>` : x(val);
+  const ta = (id, val) =>
+    E ? `<textarea class="ef ef-ta" id="${id}">${x(val)}</textarea>` : x(val);
+
+  /* ── hero ── */
+  s("c-avail",   fi("e-avail",   portData.hero.availability));
+  s("c-eyebrow", fi("e-eyebrow", portData.hero.eyebrow));
+  s("c-herosub", ta("e-herosub", portData.hero.subtitle));
+
+  if (E) {
+    s("c-heroname",
+      `<input class="ef ef-bigname" id="e-heroname" value="${x(portData.hero.name)}"/>` +
+      `<div class="ef-hint">Gradient word: <input class="ef ef-sm" id="e-herohl" value="${x(portData.hero.highlight)}" style="display:inline;width:100px"/></div>`
+    );
+  } else {
+    const hl  = portData.hero.highlight || portData.hero.name.split(" ").pop();
+    s("c-heroname", portData.hero.name.replace(hl, `<span>${hl}</span>`));
+  }
+
+  /* ── avatar ── */
+  s("c-av-init",    fi("e-av-init",    portData.avatar.initials, "ef-bigname"));
+  s("c-av-name",    fi("e-av-name",    portData.avatar.name));
+  s("c-av-role",    fi("e-av-role",    portData.avatar.role,     "ef-sm"));
+  s("c-av-loc",     fi("e-av-loc",     portData.avatar.location, "ef-sm"));
+  s("c-av-gpa",     fi("e-av-gpa",     portData.avatar.gpa,      "ef-sm"));
+  s("c-av-status",  fi("e-av-status",  portData.avatar.status,   "ef-sm"));
+  s("c-av-email",   fi("e-av-email",   portData.avatar.email,    "ef-sm"));
+  s("c-av-linkedin",fi("e-av-linkedin",portData.avatar.linkedin, "ef-sm"));
+  s("c-av-github",  fi("e-av-github",  portData.avatar.github,   "ef-sm"));
+  const el = document.getElementById("c-link-email");
+  if (el && !E) el.href = "mailto:" + portData.avatar.email;
+
+  /* ── stats ── */
+  ["s1","s2","s3","s4"].forEach(k => {
+    s("c-"+k+"-val", fi("e-"+k+"-val", portData.stats[k+"_val"]));
+    s("c-"+k+"-lbl", fi("e-"+k+"-lbl", portData.stats[k+"_lbl"], "ef-sm"));
+  });
+
+  /* ── experience ── */
+  const expEl = document.getElementById("exp-list");
+  expEl.innerHTML = "";
+  openExp = null;
+  (portData.experience || []).forEach((exp, i) => {
+    const item = document.createElement("div");
+    item.className = "exp-item"; item.id = "ei-" + i;
+    item.innerHTML = `
+      <div class="exp-dot-col">
+        <div class="exp-dot" id="edot-${i}" style="border-color:${exp.accent}"></div>
+        ${i < portData.experience.length - 1 ? '<div class="exp-line"></div>' : ""}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="exp-period">${E ? `<input class="ef ef-sm" id="e-exp-per-${i}" value="${x(exp.period)}"/>` : x(exp.period)}</div>
+        <div class="exp-role">${E ? `<input class="ef" id="e-exp-role-${i}" value="${x(exp.role)}"/>` : x(exp.role)}</div>
+        <div class="exp-co">${E ? `<input class="ef ef-sm" id="e-exp-co-${i}" value="${x(exp.company)}"/>` : x(exp.company)}</div>
+        <div class="exp-desc${E ? " open" : ""}" id="edesc-${i}">${E ? `<textarea class="ef ef-ta" id="e-exp-desc-${i}">${x(exp.desc)}</textarea>` : x(exp.desc)}</div>
+      </div>`;
+    if (!E) {
+      item.addEventListener("click", () => {
+        const was = openExp === i;
+        portData.experience.forEach((_, j) => {
+          document.getElementById("edesc-" + j)?.classList.remove("open");
+          document.getElementById("ei-" + j)?.classList.remove("active");
+          const d = document.getElementById("edot-" + j);
+          if (d) { d.style.background = "transparent"; d.style.boxShadow = "none"; }
+        });
+        if (!was) {
+          document.getElementById("edesc-" + i)?.classList.add("open");
+          item.classList.add("active");
+          const d = document.getElementById("edot-" + i);
+          if (d) { d.style.background = exp.accent; d.style.boxShadow = `0 0 6px ${exp.accent}88`; }
+          openExp = i;
+        } else openExp = null;
+      });
+    }
+    expEl.appendChild(item);
+  });
+
+  /* ── projects ── */
+  const projEl = document.getElementById("proj-list");
+  projEl.innerHTML = "";
+  (portData.projects || []).forEach((p, i) => {
+    const card = document.createElement("div");
+    card.className = "proj-card";
+    card.style.setProperty("--pc", p.color);
+    card.innerHTML = `
+      <div class="proj-hdr">
+        <div class="proj-name" style="color:${p.color}">
+          ${E ? `<input class="ef" id="e-proj-name-${i}" value="${x(p.name)}"/>` : x(p.name)}
+        </div>
+        <div class="proj-stars">★ ${E ? `<input class="ef ef-tiny" id="e-proj-stars-${i}" value="${p.stars}"/>` : p.stars}</div>
+      </div>
+      <div class="proj-desc">${E ? `<textarea class="ef ef-ta" id="e-proj-desc-${i}">${x(p.desc)}</textarea>` : x(p.desc)}</div>
+      ${E
+        ? `<div class="ef-hint">Tags (comma-separated):</div><input class="ef ef-sm" id="e-proj-tags-${i}" value="${x(p.tags)}"/>`
+        : `<div class="proj-tags">${(p.tags||"").split(",").map(t=>`<span class="proj-tag">${t.trim()}</span>`).join("")}</div>`}`;
+    projEl.appendChild(card);
+  });
+
+  /* ── education ── */
+  const eduEl = document.getElementById("edu-wrap");
+  eduEl.innerHTML = "";
+  (portData.education || []).forEach((edu, i) => {
+    const item = document.createElement("div");
+    item.className = "edu-item";
+    item.innerHTML = `
+      <div class="edu-icon" style="background:${edu.bg}">${edu.icon}</div>
+      <div>
+        <div class="edu-school">${E ? `<input class="ef" id="e-edu-school-${i}" value="${x(edu.school)}"/>` : x(edu.school)}</div>
+        <div class="edu-degree">${E ? `<input class="ef ef-sm" id="e-edu-deg-${i}" value="${x(edu.degree)}"/>` : x(edu.degree)}</div>
+        <div class="edu-year">${E ? `<input class="ef ef-sm" id="e-edu-year-${i}" value="${x(edu.year)}"/>` : x(edu.year)}</div>
+      </div>`;
+    eduEl.appendChild(item);
+  });
+
+  /* editing border */
+  document.querySelectorAll(".card").forEach(c => c.classList.toggle("editing", E));
+}
+
+/* ════════════════════════════════════════
+   TOOLS (static)
+════════════════════════════════════════ */
+const tw = document.getElementById("tools-wrap");
+TOOLS.forEach((t, idx) => {
+  const el = document.createElement("div");
+  el.className = "tb";
+  el.style.cssText = `background:${t.bg};border:1px solid ${t.color}22;animation-delay:${idx*45+320}ms`;
+  el.innerHTML = `<span class="ti" style="color:${t.color};box-shadow:0 0 8px ${t.color}44">${t.i}</span><span class="tn">${t.name}</span>`;
+  tw.appendChild(el);
+});
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function s(id, html) { const el=document.getElementById(id); if(el) el.innerHTML=html; }
+function x(v) { return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toast(msg, type="info") {
+  const t = document.createElement("div");
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("in"));
+  setTimeout(() => { t.classList.remove("in"); setTimeout(() => t.remove(), 350); }, 3000);
+}
 </script>
 </body>
 </html>
