@@ -207,6 +207,14 @@
     .ef-sm{font-size:.72rem!important;}
     .ef-tiny{width:52px!important;text-align:center;}
     .ef-hint{font-family:'DM Mono',monospace;font-size:.6rem;color:#555;margin-top:.4rem;margin-bottom:.2rem;}
+    .arr-bar{display:flex;gap:.4rem;margin:.5rem 0;align-items:center;}
+    .arr-add,.arr-del{width:24px;height:24px;border-radius:6px;border:1px solid #a78bfa33;background:#1a1a2e;color:#a78bfa;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+    .arr-add:hover{background:#252540;border-color:#a78bfa66;}
+    .arr-del{border-color:#f8717133;color:#f87171;background:#1e1010;}
+    .arr-del:hover{background:#2a1414;border-color:#f8717166;}
+    .arr-lbl{font-family:'DM Mono',monospace;font-size:.6rem;color:#555;letter-spacing:.08em;}
+    .tool-edit-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem;flex-wrap:wrap;}
+    .tool-edit-row .ef{width:auto;display:inline-block;}
 
     /* ── toast ── */
     .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:.75rem 1.25rem;border-radius:12px;font-size:.82rem;font-weight:500;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;}
@@ -435,29 +443,29 @@ const DEFAULT = {
   education:[
     {icon:"🎓", school:"MIT",           degree:"B.S. Computer Science & AI",        year:"Class of 2026",   bg:"#0d1a30"},
     {icon:"🏫", school:"Coursera / edX", degree:"ML Specialization · Deep Learning", year:"2023 · Andrew Ng", bg:"#1a100d"}
+  ],
+  tools:[
+    {name:"React",color:"#61DAFB",bg:"#0d2a35",i:"R"},
+    {name:"Python",color:"#FFD43B",bg:"#2b2200",i:"Py"},
+    {name:"TypeScript",color:"#3178C6",bg:"#0d1e38",i:"TS"},
+    {name:"Node.js",color:"#68A063",bg:"#0d2015",i:"N"},
+    {name:"Figma",color:"#F24E1E",bg:"#2d1008",i:"Fi"},
+    {name:"Docker",color:"#2496ED",bg:"#082030",i:"Do"},
+    {name:"SQL",color:"#E97627",bg:"#2a1500",i:"SQ"},
+    {name:"Git",color:"#F05032",bg:"#2a0e08",i:"Gi"},
+    {name:"Tailwind",color:"#38BDF8",bg:"#082028",i:"Tw"},
+    {name:"GraphQL",color:"#E10098",bg:"#280018",i:"GQ"},
+    {name:"Redis",color:"#FF4438",bg:"#2a0808",i:"Re"},
+    {name:"AWS",color:"#FF9900",bg:"#2a1e00",i:"AW"}
   ]
 };
 
-/* ── Tools (static, not DB-editable) ── */
-const TOOLS=[
-  {name:"React",     color:"#61DAFB",bg:"#0d2a35",i:"R"},
-  {name:"Python",    color:"#FFD43B",bg:"#2b2200",i:"Py"},
-  {name:"TypeScript",color:"#3178C6",bg:"#0d1e38",i:"TS"},
-  {name:"Node.js",   color:"#68A063",bg:"#0d2015",i:"N"},
-  {name:"Figma",     color:"#F24E1E",bg:"#2d1008",i:"Fi"},
-  {name:"Docker",    color:"#2496ED",bg:"#082030",i:"Do"},
-  {name:"SQL",       color:"#E97627",bg:"#2a1500",i:"SQ"},
-  {name:"Git",       color:"#F05032",bg:"#2a0e08",i:"Gi"},
-  {name:"Tailwind",  color:"#38BDF8",bg:"#082028",i:"Tw"},
-  {name:"GraphQL",   color:"#E10098",bg:"#280018",i:"GQ"},
-  {name:"Redis",     color:"#FF4438",bg:"#2a0808",i:"Re"},
-  {name:"AWS",       color:"#FF9900",bg:"#2a1e00",i:"AW"},
-];
+/* Tools are now in DEFAULT.tools and stored in Firebase */
 
 /* ════════════════════════════════════════
    STATE
 ════════════════════════════════════════ */
-let db, auth, isAdmin = false, editMode = false, portData = null, openExp = null;
+let db, auth, isAdmin = false, editMode = false, portData = null, openExp = null, portDataBackup = null;
 
 /* ════════════════════════════════════════
    FIREBASE INIT  (compat API — global scope)
