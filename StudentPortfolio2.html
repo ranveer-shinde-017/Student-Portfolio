@@ -1462,6 +1462,16 @@
           <div class="eyebrow"><span id="c-eyebrow"></span></div>
           <h1 class="heroname" id="c-heroname"></h1>
           <div class="herosub" id="c-herosub"></div>
+          <div class="actions">
+            <a id="c-link-cv" href="#" class="btn-p" target="_blank" rel="noopener">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download CV
+            </a>
+          </div>
           <!-- Social links removed from hero (deduplicated into avatar soc-row icons) -->
         </div>
 
@@ -2106,6 +2116,9 @@
       s("c-avail", fi("e-avail", portData.hero.availability));
       s("c-eyebrow", fi("e-eyebrow", portData.hero.eyebrow));
       s("c-herosub", ta("e-herosub", portData.hero.subtitle));
+
+      const cvEl = document.getElementById("c-link-cv");
+      if (cvEl) cvEl.href = formatUrl(portData.hero.cvLink) || "#";
 
       if (E) {
         // inject CV / GitHub / Live URL edit fields below the subtitle
