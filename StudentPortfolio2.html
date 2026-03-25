@@ -1999,26 +1999,25 @@
       const heroGithubHref = normalizeGithub(githubVal) || "#";
       const heroEmailHref = toMailto(emailVal);
 
-      const setHref = (id, href) => {
-        const el = document.getElementById(id);
-        if (el) el.href = href || "#";
-      };
-
-      setHref("link-linkedin", heroLinkedinHref);
-      setHref("link-github", heroGithubHref);
-      setHref("link-email", heroEmailHref);
+      // Bind hero links
+      document.getElementById("link-linkedin").href = heroLinkedinHref;
+      document.getElementById("link-github").href = heroGithubHref;
+      document.getElementById("link-email").href = heroEmailHref;
 
       // Bind contact links
-      setHref("link-linkedin-contact", heroLinkedinHref);
-      setHref("link-github-contact", heroGithubHref);
-      setHref("link-email-contact", heroEmailHref);
+      const contactGithubHref = normalizeGithub(
+        links.github ?? portData.avatar?.githubUrl ?? portData.avatar?.github ?? portData.hero?.githubUrl ?? ""
+      ) || "#";
+      document.getElementById("link-linkedin-contact").href = heroLinkedinHref;
+      document.getElementById("link-github-contact").href = contactGithubHref;
+      document.getElementById("link-email-contact").href = heroEmailHref;
 
       // Profile photo
       const photoURL = portData.avatar?.photoURL || "";
       const imgEl = document.getElementById("profile-pic");
       const placeholderEl = document.getElementById("profile-placeholder");
       if (imgEl && placeholderEl) {
-        imgEl.src = photoURL || "";
+        document.getElementById("profile-pic").src = portData.avatar?.photoURL || "";
         imgEl.style.display = photoURL ? "block" : "none";
         placeholderEl.style.display = photoURL ? "none" : "flex";
 
@@ -2131,15 +2130,9 @@
         document.getElementById("c-av-url-edit")?.remove();
       }
 
-      // Bind contact links
-      const emailLink = document.getElementById("c-link-email");
-      if (emailLink) emailLink.href = portData.avatar.emailUrl || ("mailto:" + portData.avatar.email) || "#";
-
-      const liLink = document.getElementById("c-link-linkedin");
-      if (liLink) liLink.href = portData.avatar.linkedinUrl || "#";
-
-      const ghcLink = document.getElementById("c-link-githubcontact");
-      if (ghcLink) ghcLink.href = portData.avatar.githubUrl || "#";
+      // Bind hero/contact links + profile photo.
+      // (Hero/Contact anchors are now driven by `loadData()` using the `link-*` ids.)
+      loadData();
 
       // Bind social icon buttons
       const socGh = document.getElementById("soc-gh");
