@@ -1985,9 +1985,23 @@
         const u = new URL(s);
         if (u.protocol !== "http:" && u.protocol !== "https:") return false;
 
-        // Basic "looks like an image URL" check (keeps us from probing garbage).
-        // Note: some CDNs may serve images without extensions, but this is intentionally basic.
-        return /\.(jpe?g|png|gif|webp|svg|bmp|tiff?)$/i.test(u.pathname);
+        // Basic "looks like an image URL" guard:
+        // - Allow common image extensions.
+        // - Also allow GitHub raw URLs even if the extension check is imperfect.
+        // - For other domains, accept URLs that have a "file-like" last path segment.
+        const pathname = u.pathname || "";
+        if (!pathname || pathname === "/") return false;
+        if (pathname.endsWith("/")) return false;
+
+        const lastSeg = pathname.split("/").filter(Boolean).pop() || "";
+        const commonExtOk = /\.(jpe?g|png|gif|webp|svg|bmp|tiff?)$/i.test(lastSeg);
+        if (commonExtOk) return true;
+
+        // GitHub raw images are typically files; allow even if extension is missing.
+        if (u.hostname === "raw.githubusercontent.com") return true;
+
+        // Otherwise: require some dot somewhere in the last segment to reduce obvious garbage.
+        return lastSeg.includes(".");
       } catch (e) {
         return false;
       }
