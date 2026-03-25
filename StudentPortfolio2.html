@@ -11,10 +11,10 @@
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap"
     rel="stylesheet" />
 
+  <!-- Firebase Compat (v9 compat layer — exposes window.firebase, no ESM needed) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
   <style>
     *,
@@ -1030,4 +1030,1494 @@
       margin-bottom: .4rem;
     }
 
-    .
+    .ef-sm {
+      font-size: .72rem !important;
+    }
+
+    .ef-tiny {
+      width: 52px !important;
+      text-align: center;
+    }
+
+    .ef-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      color: #555;
+      margin-top: .4rem;
+      margin-bottom: .2rem;
+    }
+
+    .arr-bar {
+      display: flex;
+      gap: .4rem;
+      margin: .5rem 0;
+      align-items: center;
+    }
+
+    .arr-add,
+    .arr-del {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid #a78bfa33;
+      background: #1a1a2e;
+      color: #a78bfa;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+
+    .arr-add:hover {
+      background: #252540;
+      border-color: #a78bfa66;
+    }
+
+    .arr-del {
+      border-color: #f8717133;
+      color: #f87171;
+      background: #1e1010;
+    }
+
+    .arr-del:hover {
+      background: #2a1414;
+      border-color: #f8717166;
+    }
+
+    .arr-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      color: #555;
+      letter-spacing: .08em;
+    }
+
+    .tool-edit-row {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: .4rem;
+      flex-wrap: wrap;
+    }
+
+    .tool-edit-row .ef {
+      width: auto;
+      display: inline-block;
+    }
+
+    /* ── toast ── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      padding: .75rem 1.25rem;
+      border-radius: 12px;
+      font-size: .82rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      max-width: 320px;
+    }
+
+    .toast.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-success {
+      background: #0d2015;
+      border: 1px solid #34d39933;
+      color: #34d399;
+    }
+
+    .toast-error {
+      background: #200a0a;
+      border: 1px solid #f8717133;
+      color: #f87171;
+    }
+
+    .toast-info {
+      background: #141420;
+      border: 1px solid #a78bfa33;
+      color: #a78bfa;
+    }
+
+    /* ══ REVIEWS SECTION (Feature 4 & 5) ══ */
+    .reviews-compose {
+      background: #141414;
+      border: 1px solid #1e1e1e;
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .reviews-compose-top {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .75rem;
+    }
+
+    .rev-user-img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #2a2a2a;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .rev-user-name {
+      font-size: .8rem;
+      color: #bbb;
+      font-weight: 500;
+    }
+
+    .rev-textarea {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: .6rem .75rem;
+      color: #e0e0e0;
+      font-family: 'Geist', sans-serif;
+      font-size: .82rem;
+      resize: none;
+      outline: none;
+      min-height: 64px;
+      line-height: 1.6;
+      transition: border-color .2s;
+    }
+
+    .rev-textarea:focus {
+      border-color: #a78bfa55;
+    }
+
+    .rev-submit-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: .6rem;
+    }
+
+    .rev-submit-btn {
+      padding: .45rem 1rem;
+      background: #1a1a2e;
+      color: #a78bfa;
+      border: 1px solid #a78bfa33;
+      border-radius: 8px;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, box-shadow .15s, transform .15s;
+    }
+
+    .rev-submit-btn:hover {
+      background: #252540;
+    }
+
+    .rev-submit-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 14px 4px #a78bfa44;
+      animation: pop-violet .35s ease forwards;
+    }
+
+    .rev-list {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    .rev-item {
+      background: #141414;
+      border: 1px solid #1e1e1e;
+      border-radius: 14px;
+      padding: 1rem;
+      transition: border-color .2s;
+    }
+
+    .rev-item:hover {
+      border-color: #2a2a2a;
+    }
+
+    .rev-header {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .55rem;
+    }
+
+    .rev-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #2a2a2a;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #1e1e1e;
+    }
+
+    .rev-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rev-author {
+      font-size: .82rem;
+      font-weight: 600;
+      color: #d0d0d0;
+    }
+
+    .rev-time {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      color: #444;
+      margin-top: .1rem;
+    }
+
+    .rev-admin-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: .58rem;
+      padding: .12rem .45rem;
+      background: #0d2015;
+      border: 1px solid #34d39922;
+      color: #34d399;
+      border-radius: 99px;
+    }
+
+    .rev-text {
+      font-size: .82rem;
+      color: #888;
+      line-height: 1.65;
+    }
+
+    .rev-actions {
+      display: flex;
+      gap: .5rem;
+      margin-top: .75rem;
+    }
+
+    .rev-action-btn {
+      padding: .3rem .7rem;
+      border-radius: 7px;
+      font-size: .7rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+
+    .rev-delete-btn {
+      background: #200a0a;
+      color: #f87171;
+      border: 1px solid #f8717133;
+    }
+
+    .rev-delete-btn:hover {
+      background: #2e1010;
+      border-color: #f8717166;
+    }
+
+    .rev-reply-btn {
+      background: #1a1a2e;
+      color: #a78bfa;
+      border: 1px solid #a78bfa33;
+    }
+
+    .rev-reply-btn:hover {
+      background: #252540;
+    }
+
+    .rev-reply-box {
+      margin-top: .75rem;
+      display: none;
+    }
+
+    .rev-reply-box.open {
+      display: block;
+    }
+
+    .rev-reply-textarea {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #a78bfa33;
+      border-radius: 8px;
+      padding: .5rem .65rem;
+      color: #e0e0e0;
+      font-family: 'Geist', sans-serif;
+      font-size: .78rem;
+      resize: none;
+      outline: none;
+      min-height: 52px;
+      line-height: 1.6;
+      transition: border-color .2s;
+    }
+
+    .rev-reply-textarea:focus {
+      border-color: #a78bfa55;
+    }
+
+    .rev-reply-submit {
+      margin-top: .45rem;
+      padding: .35rem .75rem;
+      background: #0d2015;
+      color: #34d399;
+      border: 1px solid #34d39933;
+      border-radius: 7px;
+      font-size: .72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .rev-reply-submit:hover {
+      background: #142b1f;
+    }
+
+    /* nested admin reply */
+    .rev-admin-reply {
+      margin-top: .75rem;
+      padding: .65rem .85rem;
+      background: #0d1a10;
+      border-left: 2px solid #34d39955;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .rev-admin-reply-label {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      color: #34d399;
+      margin-bottom: .3rem;
+    }
+
+    .rev-admin-reply-text {
+      font-size: .8rem;
+      color: #7dbf9c;
+      line-height: 1.6;
+    }
+
+    .rev-empty {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      color: #333;
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    /* ── responsive ── */
+    @media(max-width:768px) {
+      .c-hero, .c-avatar, .c-stats, .c-tools,
+      .c-exp, .c-projects, .c-contact, .c-reviews {
+        grid-column: span 12;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════ LOGIN ═══════ -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo" id="login-logo-wrap">RS</div>
+      <div class="login-title">Portfolio Access</div>
+      <p class="login-sub">Sign in with Google to view this portfolio.<br />Admin editing is reserved for the portfolio
+        owner.</p>
+      <div class="login-rule">// authenticate to continue</div>
+      <button class="btn-g" id="googleSignInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335"
+            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+          <path fill="#4285F4"
+            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+          <path fill="#FBBC05"
+            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+          <path fill="#34A853"
+            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="login-note">🔒 Secured with Google OAuth 2.0<br />Admin privileges require verified email ownership
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ APP ═══════ -->
+  <div id="app" style="display:none">
+    <div id="admin-bar"></div>
+    <div class="p-root">
+      <div class="grid">
+
+        <!-- HERO -->
+        <div class="card c-hero">
+          <div class="glow" style="background:#a78bfa;top:-40px;right:-20px"></div>
+          <div class="avail">
+            <div class="blink"></div><span id="c-avail"></span>
+          </div>
+          <div class="eyebrow"><span id="c-eyebrow"></span></div>
+          <h1 class="heroname" id="c-heroname"></h1>
+          <div class="herosub" id="c-herosub"></div>
+          <!-- Social links removed from hero (deduplicated into avatar soc-row icons) -->
+        </div>
+
+        <!-- AVATAR -->
+        <div class="card c-avatar">
+          <div class="glow" style="background:#34d399;bottom:-30px;left:-20px"></div>
+          <!-- Feature 2: av-ring now holds img tag, initials shown as fallback text -->
+          <div class="av-ring" id="c-av-ring">
+            <img id="profile-pic" class="absolute inset-0 w-full h-full object-cover rounded-full" alt="" />
+            <div id="profile-placeholder" class="profile-placeholder" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <span id="c-av-init"></span>
+            <div class="av-online"></div>
+          </div>
+          <div class="av-name" id="c-av-name"></div>
+          <div class="av-role" id="c-av-role"></div>
+          <div class="av-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <span id="c-av-loc"></span>
+          </div>
+          <div class="av-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+              <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+              <line x1="6" y1="2" x2="6" y2="4" />
+              <line x1="10" y1="2" x2="10" y2="4" />
+              <line x1="14" y1="2" x2="14" y2="4" />
+            </svg>
+            <span id="c-av-gpa"></span>
+          </div>
+          <div class="av-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span id="c-av-status"></span>
+          </div>
+          <div class="soc-row">
+            <a id="soc-gh" class="soc-btn" href="#" target="_blank" rel="noopener">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+            </a>
+            <a id="soc-li" class="soc-btn" href="#" target="_blank" rel="noopener">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect x="2" y="9" width="4" height="12" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
+            </a>
+            <a id="soc-em" class="soc-btn" href="#" target="_blank" rel="noopener">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="card c-stats">
+          <div class="lbl">// quick stats</div>
+          <div class="sg">
+            <div class="sp"><span class="sv" id="c-s1-val" style="color:#a78bfa"></span><span class="sl"
+                id="c-s1-lbl"></span></div>
+            <div class="sp"><span class="sv" id="c-s2-val" style="color:#34d399"></span><span class="sl"
+                id="c-s2-lbl"></span></div>
+            <div class="sp"><span class="sv" id="c-s3-val" style="color:#fb923c"></span><span class="sl"
+                id="c-s3-lbl"></span></div>
+            <div class="sp"><span class="sv" id="c-s4-val" style="color:#38bdf8"></span><span class="sl"
+                id="c-s4-lbl"></span></div>
+          </div>
+        </div>
+
+        <!-- TOOLS -->
+        <div class="card c-tools">
+          <div class="sec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6" />
+              <polyline points="8 6 2 12 8 18" />
+            </svg>
+            Tool Proficiencies
+          </div>
+          <div class="tw" id="tools-wrap"></div>
+        </div>
+
+        <!-- EXPERIENCE -->
+        <div class="card c-exp">
+          <div class="sec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
+            Work Experience
+          </div>
+          <div id="exp-list"></div>
+        </div>
+
+        <!-- PROJECTS -->
+        <div class="card c-projects">
+          <div class="sec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5" />
+              <line x1="12" y1="19" x2="20" y2="19" />
+            </svg>
+            Featured Projects
+          </div>
+          <div class="proj-list" id="proj-list"></div>
+        </div>
+
+        <!-- CONTACT + EDUCATION -->
+        <div class="card c-contact">
+          <div class="glow" style="background:#38bdf8;top:20px;right:-30px"></div>
+          <div class="sec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            Education
+          </div>
+          <div id="edu-wrap"></div>
+          <!-- Social links removed from contact (deduplicated into avatar soc-row icons) -->
+        </div>
+
+        <!-- REVIEWS (Feature 4 & 5) -->
+        <div class="card c-reviews">
+          <div class="glow" style="background:#a78bfa;bottom:-30px;right:-30px"></div>
+          <div class="sec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Reviews &amp; Comments
+          </div>
+          <!-- Compose box — rendered by JS -->
+          <div id="rev-compose-wrap"></div>
+          <!-- Reviews list -->
+          <div class="rev-list" id="rev-list"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ MAIN SCRIPT ═══════ -->
+  <script>
+    /* ─────────────────────────────────────────────────────────────
+       🔧  HOW TO FILL THIS IN:
+
+       STEP 1 — Firebase API Key + App details:
+         Firebase Console → Project Settings → Your Apps → SDK config
+         Copy apiKey, messagingSenderId, appId from there.
+
+       STEP 2 — OAuth Client ID (THIS is what fixes the auth error):
+         Google Cloud Console (console.cloud.google.com)
+         → APIs & Services → Credentials
+         → OAuth 2.0 Client IDs → your Web Client
+         → Copy the Client ID  (looks like: 123456789-xxxx.apps.googleusercontent.com)
+         → Paste it as OAUTH_CLIENT_ID below.
+
+       STEP 3 — In Firebase Console:
+         → Authentication → Sign-in method → Google → Enable
+         → Paste that same OAuth Client ID into "Web SDK configuration"
+    ───────────────────────────────────────────────────────────── */
+    const firebaseConfig = {
+      apiKey: "AIzaSyA660ti0Metic8xwp8PhPRjNAeIgCzMl0g",
+      authDomain: "student-portfolio-f7e64.firebaseapp.com",
+      databaseURL: "https://student-portfolio-f7e64-default-rtdb.firebaseio.com",
+      projectId: "student-portfolio-f7e64",
+      storageBucket: "student-portfolio-f7e64.firebasestorage.app",
+      messagingSenderId: "565983301673",
+      appId: "1:565983301673:web:3c8a44f1fcd3245b790c38",
+      measurementId: "G-N4968SE7BC"
+    };
+
+    const ADMIN_EMAIL = "ranveer.shinde.work@gmail.com";
+
+    /* ── Default seed data ── */
+    const DEFAULT = {
+      hero: {
+        name: "Ranveer Shinde", highlight: "Shinde",
+        eyebrow: "AI & Data Science Student",
+        subtitle: "Building intelligent systems and data-driven solutions. Passionate about machine learning, AI models, and turning raw data into real-world insights.",
+        availability: "Open to Internships · Summer 2025",
+        cvLink: "#",
+        githubUrl: "https://github.com/ranveershinde",
+        liveUrl: "#"
+      },
+      avatar: {
+        initials: "RS",
+        photoURL: "",
+        name: "Ranveer Shinde",
+        role: "AI & Data Science Student",
+        location: "Aurangabad, Maharashtra, IN",
+        gpa: "Pursuing B.Tech · AI & DS",
+        status: "Available for remote work",
+        email: "ranveer.shinde.work@gmail.com",
+        emailUrl: "mailto:ranveer.shinde.work@gmail.com",
+        linkedin: "/in/ranveershinde",
+        linkedinUrl: "https://linkedin.com/in/ranveershinde",
+        github: "@ranveershinde",
+        githubUrl: "https://github.com/ranveershinde"
+      },
+      stats: {
+        s1_val: "10+", s1_lbl: "projects built",
+        s2_val: "3",   s2_lbl: "internships",
+        s3_val: "500+",s3_lbl: "problems solved",
+        s4_val: "5",   s4_lbl: "AI models trained"
+      },
+      experience: [
+        { role: "Data Science Intern", company: "Organisation Name", period: "Month Year – Month Year", desc: "Describe your responsibilities and impact here. E.g. Built and deployed ML pipelines that improved prediction accuracy by X%.", accent: "#FFD43B" },
+        { role: "AI Research Assistant", company: "University / Lab", period: "Month Year – Month Year", desc: "Describe your research contributions here. E.g. Contributed to NLP research on multilingual datasets using Python and HuggingFace.", accent: "#a78bfa" }
+      ],
+      projects: [
+        { name: "AI Chatbot", color: "#a78bfa", stars: 0, desc: "Conversational AI assistant built with Python and a large language model API. Supports context-aware multi-turn dialogue.", tags: "Python,AI Models,NLP" },
+        { name: "Data Scraper & Analyser", color: "#34d399", stars: 0, desc: "Automated web scraping pipeline that collects, cleans, and visualises structured datasets for downstream ML tasks.", tags: "Python,Web Scraping,SQL" },
+        { name: "ML Classifier", color: "#fb923c", stars: 0, desc: "End-to-end supervised learning pipeline for tabular data classification with feature engineering and model evaluation.", tags: "Python,Machine Learning,Data Science" }
+      ],
+      education: [
+        { icon: "🎓", school: "Your College / University", degree: "B.Tech – Artificial Intelligence & Data Science", year: "Expected 2026", bg: "#0d1a30" },
+        { icon: "📜", school: "Coursera / NPTEL", degree: "Machine Learning Specialization", year: "2024 · Andrew Ng", bg: "#1a100d" }
+      ],
+      tools: [
+        { name: "Python",           color: "#FFD43B", bg: "#2b2200", i: "Py"  },
+        { name: "SQL",              color: "#E97627", bg: "#2a1500", i: "SQ"  },
+        { name: "Machine Learning", color: "#34d399", bg: "#0d2015", i: "ML"  },
+        { name: "Data Science",     color: "#38BDF8", bg: "#082028", i: "DS"  },
+        { name: "AI Models",        color: "#a78bfa", bg: "#1a1035", i: "AI"  },
+        { name: "Web Scraping",     color: "#fb923c", bg: "#2a1500", i: "WS"  },
+        { name: "DSA",              color: "#f87171", bg: "#200a0a", i: "DSA" }
+      ]
+    };
+
+    /* ════════════════════════════════════════
+       STATE
+    ════════════════════════════════════════ */
+    let db, auth, isAdmin = false, editMode = false, portData = null, openExp = null, portDataBackup = null;
+
+    /* ════════════════════════════════════════
+       FIREBASE INIT
+    ════════════════════════════════════════ */
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.database();
+
+    /* ── Attach Google sign-in to button ── */
+    document.getElementById("googleSignInBtn").addEventListener("click", async () => {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+        await auth.signInWithPopup(provider);
+      } catch (e) {
+        toast("Sign-in failed: " + e.message, "error");
+      }
+    });
+
+    /* ── Auth state listener ── */
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        isAdmin = user.email === ADMIN_EMAIL;
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        await seedIfEmpty();
+        db.ref("portfolio").on("value", snap => {
+          portData = snap.val() || DEFAULT;
+          render();
+          renderBar(user);
+        });
+        // Listen for reviews live
+        db.ref("reviews").on("value", snap => {
+          renderReviews(snap.val());
+        });
+      } else {
+        isAdmin = false; editMode = false;
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("app").style.display = "none";
+        document.getElementById("admin-bar").innerHTML = "";
+      }
+    });
+
+    async function seedIfEmpty() {
+      const snap = await db.ref("portfolio").once("value");
+      if (!snap.exists()) await db.ref("portfolio").set(DEFAULT);
+    }
+
+    /* ════════════════════════════════════════
+       ADMIN BAR
+    ════════════════════════════════════════ */
+    function renderBar(user) {
+      const bar = document.getElementById("admin-bar");
+      bar.innerHTML = `
+    <div class="ab-left">
+      <img src="${user.photoURL || ""}" class="ab-img" onerror="this.style.display='none'"/>
+      <span class="ab-name">${user.displayName || user.email}</span>
+      ${isAdmin
+          ? '<span class="ab-pill ab-admin">⚡ Admin</span>'
+          : '<span class="ab-pill ab-viewer">👁 Viewer</span>'}
+    </div>
+    <div class="ab-right">
+      ${isAdmin && !editMode ? '<button class="ab-btn ab-edit" id="btn-edit">✏️ Edit Portfolio</button>' : ""}
+      ${isAdmin && editMode ? '<button class="ab-btn ab-save" id="btn-save">💾 Save Changes</button>' : ""}
+      ${isAdmin && editMode ? '<button class="ab-btn ab-reset" id="btn-reset">⚠️ Factory Reset</button>' : ""}
+      ${isAdmin && editMode ? '<button class="ab-btn ab-cancel" id="btn-cancel">✕ Cancel</button>' : ""}
+      <button class="ab-btn ab-out" id="btn-signout">Sign Out</button>
+    </div>`;
+
+      document.getElementById("btn-signout")?.addEventListener("click", () => {
+        editMode = false; auth.signOut();
+      });
+      document.getElementById("btn-edit")?.addEventListener("click", () => {
+        portDataBackup = JSON.parse(JSON.stringify(portData));
+        editMode = true; render(); renderBar(auth.currentUser);
+      });
+      document.getElementById("btn-cancel")?.addEventListener("click", () => {
+        if (portDataBackup) portData = portDataBackup;
+        portDataBackup = null;
+        editMode = false; render(); renderBar(auth.currentUser);
+      });
+      document.getElementById("btn-save")?.addEventListener("click", saveAll);
+      document.getElementById("btn-reset")?.addEventListener("click", async () => {
+        const confirmed = window.confirm(
+          "⚠️ FACTORY RESET\n\nThis will permanently wipe all portfolio data and restore the original defaults.\n\nAre you absolutely sure?"
+        );
+        if (!confirmed) return;
+        try {
+          await db.ref("portfolio").set(DEFAULT);
+          toast("✓ Factory reset complete. Reloading…", "success");
+          editMode = false;
+          setTimeout(() => window.location.reload(), 1500);
+        } catch (e) { toast("Reset failed: " + e.message, "error"); }
+      });
+    }
+
+    /* ════════════════════════════════════════
+       SAVE
+    ════════════════════════════════════════ */
+    async function saveAll() {
+      if (!isAdmin) return;
+      try {
+        portData.hero.availability = g("e-avail");
+        portData.hero.eyebrow = g("e-eyebrow");
+        portData.hero.name = g("e-heroname");
+        portData.hero.highlight = g("e-herohl");
+        portData.hero.subtitle = g("e-herosub");
+        const cvInput = g("e-cvlink");
+        portData.hero.cvLink = cvInput ? formatUrl(cvInput) : (portData.hero.cvLink || "#");
+        const githubHeroInput = g("e-githuburl");
+        portData.hero.githubUrl = githubHeroInput ? formatUrl(normalizeGithub(githubHeroInput)) : (portData.hero.githubUrl || "#");
+        const liveHeroInput = g("e-liveurl");
+        portData.hero.liveUrl = liveHeroInput ? formatUrl(liveHeroInput) : (portData.hero.liveUrl || "#");
+
+        portData.avatar.initials = g("e-av-init");
+        const photoInput = g("e-av-photo");
+        const photoNormalized = photoInput ? normalizeGithubRawImageUrl(photoInput) : "";
+        // Per requirements: empty/invalid URL should not overwrite the existing photo.
+        if (photoNormalized && isValidImageUrl(photoNormalized)) {
+          portData.avatar.photoURL = photoNormalized;
+        }
+        portData.avatar.name = g("e-av-name");
+        portData.avatar.role = g("e-av-role");
+        portData.avatar.location = g("e-av-loc");
+        portData.avatar.gpa = g("e-av-gpa");
+        portData.avatar.status = g("e-av-status");
+        portData.avatar.email = g("e-av-email");
+        const emailUrlInput = g("e-av-emailurl");
+        const emailAddrInput = g("e-av-email");
+        const emailFromUrl = emailUrlInput ? toMailto(emailUrlInput) : "";
+        const emailFromAddr = emailAddrInput ? toMailto(emailAddrInput) : "";
+        portData.avatar.emailUrl =
+          emailFromUrl && emailFromUrl !== "#"
+            ? emailFromUrl
+            : (emailFromAddr && emailFromAddr !== "#" ? emailFromAddr : (portData.avatar.emailUrl || ""));
+        portData.avatar.linkedin = g("e-av-linkedin");
+        const linkedinInput = g("e-av-linkedinurl");
+        portData.avatar.linkedinUrl = linkedinInput ? formatUrl(normalizeLinkedin(linkedinInput)) : (portData.avatar.linkedinUrl || "#");
+        portData.avatar.github = g("e-av-github");
+        const githubInput = g("e-av-githuburl");
+        portData.avatar.githubUrl = githubInput ? formatUrl(normalizeGithub(githubInput)) : (portData.avatar.githubUrl || "#");
+
+        ["s1", "s2", "s3", "s4"].forEach(k => {
+          portData.stats[k + "_val"] = g("e-" + k + "-val");
+          portData.stats[k + "_lbl"] = g("e-" + k + "-lbl");
+        });
+
+        portData.experience = (portData.experience || []).map((ex, i) => ({
+          ...ex,
+          role: g(`e-exp-role-${i}`),
+          company: g(`e-exp-co-${i}`),
+          period: g(`e-exp-per-${i}`),
+          desc: g(`e-exp-desc-${i}`),
+          accent: g(`e-exp-accent-${i}`) || ex.accent
+        }));
+
+        portData.projects = (portData.projects || []).map((p, i) => ({
+          ...p,
+          name: g(`e-proj-name-${i}`),
+          desc: g(`e-proj-desc-${i}`),
+          tags: g(`e-proj-tags-${i}`),
+          stars: parseInt(g(`e-proj-stars-${i}`)) || p.stars,
+          color: g(`e-proj-color-${i}`) || p.color
+        }));
+
+        portData.education = (portData.education || []).map((e, i) => ({
+          ...e,
+          icon: g(`e-edu-icon-${i}`) || e.icon,
+          school: g(`e-edu-school-${i}`),
+          degree: g(`e-edu-deg-${i}`),
+          year: g(`e-edu-year-${i}`)
+        }));
+
+        portData.tools = (portData.tools || []).map((t, i) => ({
+          ...t,
+          name: g(`e-tool-name-${i}`) || t.name,
+          i: g(`e-tool-i-${i}`) || t.i,
+          color: g(`e-tool-color-${i}`) || t.color
+        }));
+
+        await db.ref("portfolio").set(portData);
+        toast("✓ Portfolio saved!", "success");
+        editMode = false;
+        renderBar(auth.currentUser);
+      } catch (e) { toast("Save failed: " + e.message, "error"); }
+    }
+
+    function g(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : "";
+    }
+
+    function formatUrl(url) {
+      if (!url || url === "#") return "#";
+      const s = String(url).trim();
+      if (s.startsWith("mailto:")) return s;
+      if (!s.startsWith("http://") && !s.startsWith("https://")) {
+        return "https://" + s;
+      }
+      return s;
+    }
+
+    function normalizeLinkedin(url) {
+      const s = String(url || "").trim();
+      if (!s) return "";
+      if (s.startsWith("http://") || s.startsWith("https://")) return s;
+      // Common shorthand users type into the app.
+      if (s.startsWith("/in/")) return "www.linkedin.com" + s;
+      if (s.startsWith("in/")) return "www.linkedin.com/" + s;
+      if (s.startsWith("/")) return "www.linkedin.com" + s;
+      return s; // e.g. "linkedin.com/in/..." or "www.linkedin.com/in/..."
+    }
+
+    function normalizeGithub(url) {
+      const s = String(url || "").trim();
+      if (!s) return "";
+      if (s.startsWith("http://") || s.startsWith("https://")) return s;
+      // Support @handle and /path shorthands.
+      if (s.startsWith("@")) return "github.com/" + s.slice(1);
+      if (s.startsWith("/")) return "github.com" + s;
+      return s; // e.g. "github.com/user" or "www.github.com/user"
+    }
+
+    function toMailto(v) {
+      const s = String(v || "").trim();
+      if (!s) return "#";
+      if (s.toLowerCase().startsWith("mailto:")) return s;
+      if (s.includes("@")) return "mailto:" + s;
+      return "#";
+    }
+
+    /* ── profile photo URL helpers ── */
+    function normalizeGithubRawImageUrl(url) {
+      const s = String(url || "").trim();
+      if (!s) return "";
+
+      // Already a raw GitHub URL (keep as-is).
+      if (s.includes("raw.githubusercontent.com/")) return s;
+
+      // Convert github.com/.../blob/... to raw.githubusercontent.com/... (best-effort).
+      try {
+        const u = new URL(s);
+        if (u.hostname !== "github.com") return s;
+        if (!u.pathname.includes("/blob/")) return s;
+
+        // Path format: /{owner}/{repo}/blob/{branch}/{path...}
+        const parts = u.pathname.split("/").filter(Boolean);
+        const owner = parts[0];
+        const repo = parts[1];
+        const blobIdx = parts.indexOf("blob");
+        if (!owner || !repo || blobIdx === -1 || blobIdx + 2 > parts.length) return s;
+
+        const branch = parts[blobIdx + 1];
+        const filePath = parts.slice(blobIdx + 2).join("/");
+        if (!branch || !filePath) return s;
+
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+      } catch (e) {
+        return s;
+      }
+    }
+
+    function isValidImageUrl(url) {
+      const s = String(url || "").trim();
+      if (!s) return false;
+      try {
+        const u = new URL(s);
+        if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+
+        // Basic "looks like an image URL" guard:
+        // - Allow common image extensions.
+        // - Also allow GitHub raw URLs even if the extension check is imperfect.
+        // - For other domains, accept URLs that have a "file-like" last path segment.
+        const pathname = u.pathname || "";
+        if (!pathname || pathname === "/") return false;
+        if (pathname.endsWith("/")) return false;
+
+        const lastSeg = pathname.split("/").filter(Boolean).pop() || "";
+        const commonExtOk = /\.(jpe?g|png|gif|webp|svg|bmp|tiff?)$/i.test(lastSeg);
+        if (commonExtOk) return true;
+
+        // GitHub raw images are typically files; allow even if extension is missing.
+        if (u.hostname === "raw.githubusercontent.com") return true;
+
+        // Otherwise: require some dot somewhere in the last segment to reduce obvious garbage.
+        return lastSeg.includes(".");
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /* ════════════════════════════════════════
+       RENDER
+    ════════════════════════════════════════ */
+    function loadData() {
+      if (!portData) return;
+
+      // Profile photo
+      const photoURL = portData.avatar?.photoURL || "";
+      const imgEl = document.getElementById("profile-pic");
+      const placeholderEl = document.getElementById("profile-placeholder");
+      if (imgEl && placeholderEl) {
+        document.getElementById("profile-pic").src = portData.avatar?.photoURL || "";
+        imgEl.style.display = photoURL ? "block" : "none";
+        placeholderEl.style.display = photoURL ? "none" : "flex";
+
+        imgEl.onerror = function() {
+          this.style.display = "none";
+          this.removeAttribute("src");
+          placeholderEl.style.display = "flex";
+        };
+      }
+
+      // Also update the login logo photo (uses RS as fallback)
+      const loginLogo = document.getElementById("login-logo-wrap");
+      if (loginLogo) {
+        if (photoURL) {
+          loginLogo.innerHTML = `<img src="${photoURL}" alt="RS" onerror="this.parentElement.textContent='RS'"/>`;
+        }
+      }
+    }
+
+    function bindProfilePhotoUrlAutoSave() {
+      const input = document.getElementById("e-av-photo");
+      if (!input) return;
+      if (input.dataset.autosaveBound === "1") return;
+      input.dataset.autosaveBound = "1";
+
+      let debounceTimer = null;
+      let probeToken = 0;
+
+      const applyAvatarPhotoToDom = (url) => {
+        const imgEl = document.getElementById("profile-pic");
+        const placeholderEl = document.getElementById("profile-placeholder");
+        if (!imgEl || !placeholderEl) return;
+        imgEl.src = url || "";
+        imgEl.style.display = url ? "block" : "none";
+        placeholderEl.style.display = url ? "none" : "flex";
+      };
+
+      input.addEventListener("input", () => {
+        const rawUrl = (input.value || "").trim();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          // Per requirements: empty/invalid URL should not update the image.
+          if (!rawUrl) return;
+
+          const normalizedUrl = normalizeGithubRawImageUrl(rawUrl);
+          if (!normalizedUrl || !isValidImageUrl(normalizedUrl)) {
+            toast("Invalid image URL. Photo not saved.", "error");
+            return;
+          }
+
+          const token = ++probeToken;
+          const probe = new Image();
+          probe.onload = async () => {
+            if (token !== probeToken) return; // stale probe
+            if (!portData?.avatar) return;
+            portData.avatar.photoURL = normalizedUrl;
+            applyAvatarPhotoToDom(normalizedUrl);
+            try {
+              await db.ref("portfolio/avatar/photoURL").set(normalizedUrl);
+              toast("✓ Profile photo updated!", "success");
+            } catch (e) {
+              toast("Photo auto-save failed: " + e.message, "error");
+            }
+          };
+          probe.onerror = () => {
+            if (token !== probeToken) return;
+            toast("Invalid image URL. Photo not saved.", "error");
+          };
+          probe.src = normalizedUrl;
+        }, 500);
+      });
+    }
+
+    function render() {
+      if (!portData) return;
+      const E = editMode;
+
+      /* helpers */
+      const fi = (id, val, cls = "") =>
+        E ? `<input class="ef ${cls}" id="${id}" value="${x(val)}"/>` : x(val);
+      const ta = (id, val) =>
+        E ? `<textarea class="ef ef-ta" id="${id}">${x(val)}</textarea>` : x(val);
+
+      /* ── hero ── */
+      s("c-avail", fi("e-avail", portData.hero.availability));
+      s("c-eyebrow", fi("e-eyebrow", portData.hero.eyebrow));
+      s("c-herosub", ta("e-herosub", portData.hero.subtitle));
+
+      if (E) {
+        // inject CV / GitHub / Live URL edit fields below the subtitle
+        const existEdit = document.getElementById("c-cv-edit");
+        if (!existEdit) {
+          const wrap = document.createElement("div");
+          wrap.id = "c-cv-edit";
+          wrap.style.marginBottom = ".75rem";
+          wrap.innerHTML = `
+            <div class="ef-hint">CV / Resume URL:</div>
+            <input class="ef ef-sm" id="e-cvlink" value="${x(portData.hero.cvLink || '')}"/>
+            <div class="ef-hint">GitHub Profile URL (hero button):</div>
+            <input class="ef ef-sm" id="e-githuburl" value="${x(portData.hero.githubUrl || '')}"/>
+            <div class="ef-hint">Live Projects URL (hero button):</div>
+            <input class="ef ef-sm" id="e-liveurl" value="${x(portData.hero.liveUrl || '')}"/>
+          `;
+          document.getElementById("c-herosub")?.after(wrap);
+        }
+      } else {
+        document.getElementById("c-cv-edit")?.remove();
+      }
+
+      if (E) {
+        s("c-heroname",
+          `<input class="ef ef-bigname" id="e-heroname" value="${x(portData.hero.name)}"/>` +
+          `<div class="ef-hint">Gradient word: <input class="ef ef-sm" id="e-herohl" value="${x(portData.hero.highlight)}" style="display:inline;width:100px"/></div>`
+        );
+      } else {
+        const hl = portData.hero.highlight || portData.hero.name.split(" ").pop();
+        s("c-heroname", portData.hero.name.replace(hl, `<span>${hl}</span>`));
+      }
+
+      /* ── avatar photo (Feature 2) ── */
+      // Photo + placeholder are driven by loadData(); here we only manage the optional initials edit overlay.
+      const initEl = document.getElementById("c-av-init");
+      const photoURL = portData.avatar?.photoURL || "";
+      if (initEl) {
+        if (E && !photoURL) {
+          initEl.style.display = "flex";
+          s("c-av-init", fi("e-av-init", portData.avatar.initials || "RS", "ef-bigname"));
+        } else {
+          initEl.style.display = "none";
+          s("c-av-init", "");
+        }
+      }
+
+      s("c-av-name", fi("e-av-name", portData.avatar.name));
+      s("c-av-role", fi("e-av-role", portData.avatar.role, "ef-sm"));
+      s("c-av-loc", fi("e-av-loc", portData.avatar.location, "ef-sm"));
+      s("c-av-gpa", fi("e-av-gpa", portData.avatar.gpa, "ef-sm"));
+      s("c-av-status", fi("e-av-status", portData.avatar.status, "ef-sm"));
+      s("c-av-email", fi("e-av-email", portData.avatar.email, "ef-sm"));
+      s("c-av-linkedin", fi("e-av-linkedin", portData.avatar.linkedin, "ef-sm"));
+      s("c-av-github", fi("e-av-github", portData.avatar.github, "ef-sm"));
+
+      // Inject avatar URL edit fields
+      if (E) {
+        const existAv = document.getElementById("c-av-url-edit");
+        if (!existAv) {
+          const wrap = document.createElement("div");
+          wrap.id = "c-av-url-edit";
+          wrap.style.marginTop = ".5rem";
+          wrap.innerHTML = `
+            <div class="ef-hint">Profile Photo URL:</div>
+            <input class="ef ef-sm" id="e-av-photo" value="${x(portData.avatar.photoURL || '')}"/>
+            <div class="ef-hint">Email URL (mailto:...):</div>
+            <input class="ef ef-sm" id="e-av-emailurl" value="${x(portData.avatar.emailUrl || '')}"/>
+            <div class="ef-hint">LinkedIn URL:</div>
+            <input class="ef ef-sm" id="e-av-linkedinurl" value="${x(portData.avatar.linkedinUrl || '')}"/>
+            <div class="ef-hint">GitHub URL (avatar card):</div>
+            <input class="ef ef-sm" id="e-av-githuburl" value="${x(portData.avatar.githubUrl || '')}"/>
+          `;
+          // Append after the soc-row
+          document.querySelector(".c-avatar .soc-row")?.after(wrap);
+        }
+      } else {
+        document.getElementById("c-av-url-edit")?.remove();
+      }
+
+      // Bind hero/contact links + profile photo.
+      loadData();
+
+      // Bind social icon buttons
+      const links = portData.links || {};
+      const githubVal = links.github ?? portData.avatar?.githubUrl ?? portData.avatar?.github ?? "";
+      const linkedinVal = links.linkedin ?? portData.avatar?.linkedinUrl ?? portData.avatar?.linkedin ?? "";
+      const emailVal = links.email ?? portData.avatar?.emailUrl ?? portData.avatar?.email ?? "";
+
+      const socGh = document.getElementById("soc-gh");
+      if (socGh) socGh.href = formatUrl(normalizeGithub(githubVal)) || "#";
+      const socLi = document.getElementById("soc-li");
+      if (socLi) socLi.href = formatUrl(normalizeLinkedin(linkedinVal)) || "#";
+      const socEm = document.getElementById("soc-em");
+      if (socEm) socEm.href = toMailto(emailVal);
+
+      if (E) bindProfilePhotoUrlAutoSave();
+
+      /* ── stats ── */
+      ["s1", "s2", "s3", "s4"].forEach(k => {
+        s("c-" + k + "-val", fi("e-" + k + "-val", portData.stats[k + "_val"]));
+        s("c-" + k + "-lbl", fi("e-" + k + "-lbl", portData.stats[k + "_lbl"], "ef-sm"));
+      });
+
+      /* ── experience ── */
+      const expEl = document.getElementById("exp-list");
+      expEl.innerHTML = "";
+      openExp = null;
+      (portData.experience || []).forEach((exp, i) => {
+        const item = document.createElement("div");
+        item.className = "exp-item"; item.id = "ei-" + i;
+        item.innerHTML = `
+      <div class="exp-dot-col">
+        <div class="exp-dot" id="edot-${i}" style="border-color:${exp.accent}"></div>
+        ${i < portData.experience.length - 1 ? '<div class="exp-line"></div>' : ""}
+      </div>
+      <div style="flex:1;min-width:0">
+        ${E ? `<div class="arr-bar"><button class="arr-del" onclick="delArr('experience',${i})" title="Remove">−</button><span class="arr-lbl">experience #${i + 1}</span></div>` : ""}
+        <div class="exp-period">${E ? `<input class="ef ef-sm" id="e-exp-per-${i}" value="${x(exp.period)}"/>` : x(exp.period)}</div>
+        <div class="exp-role">${E ? `<input class="ef" id="e-exp-role-${i}" value="${x(exp.role)}"/>` : x(exp.role)}</div>
+        <div class="exp-co">${E ? `<input class="ef ef-sm" id="e-exp-co-${i}" value="${x(exp.company)}"/>` : x(exp.company)}</div>
+        ${E ? `<div class="ef-hint">Accent: <input class="ef ef-sm" id="e-exp-accent-${i}" value="${x(exp.accent)}" style="display:inline;width:80px"/></div>` : ""}
+        <div class="exp-desc${E ? " open" : ""}" id="edesc-${i}">${E ? `<textarea class="ef ef-ta" id="e-exp-desc-${i}">${x(exp.desc)}</textarea>` : x(exp.desc)}</div>
+      </div>`;
+        if (!E) {
+          item.addEventListener("click", () => {
+            const was = openExp === i;
+            portData.experience.forEach((_, j) => {
+              document.getElementById("edesc-" + j)?.classList.remove("open");
+              document.getElementById("ei-" + j)?.classList.remove("active");
+              const d = document.getElementById("edot-" + j);
+              if (d) { d.style.background = "transparent"; d.style.boxShadow = "none"; }
+            });
+            if (!was) {
+              document.getElementById("edesc-" + i)?.classList.add("open");
+              item.classList.add("active");
+              const d = document.getElementById("edot-" + i);
+              if (d) { d.style.background = exp.accent; d.style.boxShadow = `0 0 6px ${exp.accent}88`; }
+              openExp = i;
+            } else openExp = null;
+          });
+        }
+        expEl.appendChild(item);
+      });
+      if (E) { const ab = document.createElement("div"); ab.className = "arr-bar"; ab.innerHTML = `<button class="arr-add" onclick="addArr('experience')" title="Add">+</button><span class="arr-lbl">add experience</span>`; expEl.appendChild(ab); }
+
+      /* ── projects ── */
+      const projEl = document.getElementById("proj-list");
+      projEl.innerHTML = "";
+      (portData.projects || []).forEach((p, i) => {
+        const card = document.createElement("div");
+        card.className = "proj-card";
+        card.style.setProperty("--pc", p.color);
+        card.innerHTML = `
+      ${E ? `<div class="arr-bar"><button class="arr-del" onclick="delArr('projects',${i})" title="Remove">−</button><span class="arr-lbl">project #${i + 1}</span></div>` : ""}
+      <div class="proj-hdr">
+        <div class="proj-name" style="color:${p.color}">
+          ${E ? `<input class="ef" id="e-proj-name-${i}" value="${x(p.name)}"/>` : x(p.name)}
+        </div>
+        <div class="proj-stars">★ ${E ? `<input class="ef ef-tiny" id="e-proj-stars-${i}" value="${p.stars}"/>` : p.stars}</div>
+      </div>
+      <div class="proj-desc">${E ? `<textarea class="ef ef-ta" id="e-proj-desc-${i}">${x(p.desc)}</textarea>` : x(p.desc)}</div>
+      ${E
+            ? `<div class="ef-hint">Tags (comma-separated):</div><input class="ef ef-sm" id="e-proj-tags-${i}" value="${x(p.tags)}"/>
+           <div class="ef-hint">Color hex:</div><input class="ef ef-sm" id="e-proj-color-${i}" value="${x(p.color)}" style="width:90px"/>`
+            : `<div class="proj-tags">${(p.tags || "").split(",").map(t => `<span class="proj-tag">${t.trim()}</span>`).join("")}</div>`}`;
+        projEl.appendChild(card);
+      });
+      if (E) { const ab = document.createElement("div"); ab.className = "arr-bar"; ab.innerHTML = `<button class="arr-add" onclick="addArr('projects')" title="Add">+</button><span class="arr-lbl">add project</span>`; projEl.appendChild(ab); }
+
+      /* ── education ── */
+      const eduEl = document.getElementById("edu-wrap");
+      eduEl.innerHTML = "";
+      (portData.education || []).forEach((edu, i) => {
+        const item = document.createElement("div");
+        item.className = "edu-item";
+        item.innerHTML = `
+      ${E ? `<button class="arr-del" onclick="delArr('education',${i})" title="Remove" style="align-self:start;margin-top:.2rem">−</button>` : ""}
+      <div class="edu-icon" style="background:${edu.bg}">${E ? `<input class="ef ef-sm" id="e-edu-icon-${i}" value="${edu.icon}" style="width:36px;text-align:center"/>` : edu.icon}</div>
+      <div>
+        <div class="edu-school">${E ? `<input class="ef" id="e-edu-school-${i}" value="${x(edu.school)}"/>` : x(edu.school)}</div>
+        <div class="edu-degree">${E ? `<input class="ef ef-sm" id="e-edu-deg-${i}" value="${x(edu.degree)}"/>` : x(edu.degree)}</div>
+        <div class="edu-year">${E ? `<input class="ef ef-sm" id="e-edu-year-${i}" value="${x(edu.year)}"/>` : x(edu.year)}</div>
+      </div>`;
+        eduEl.appendChild(item);
+      });
+      if (E) { const ab = document.createElement("div"); ab.className = "arr-bar"; ab.innerHTML = `<button class="arr-add" onclick="addArr('education')" title="Add">+</button><span class="arr-lbl">add education</span>`; eduEl.appendChild(ab); }
+
+      /* ── tools (dynamic) ── */
+      const tw = document.getElementById("tools-wrap");
+      tw.innerHTML = "";
+      (portData.tools || []).forEach((t, idx) => {
+        if (E) {
+          const row = document.createElement("div");
+          row.className = "tool-edit-row";
+          row.innerHTML = `<button class="arr-del" onclick="delArr('tools',${idx})" title="Remove">−</button>
+        <input class="ef ef-sm" id="e-tool-i-${idx}" value="${x(t.i)}" style="width:40px" placeholder="Abbr"/>
+        <input class="ef ef-sm" id="e-tool-name-${idx}" value="${x(t.name)}" style="width:110px" placeholder="Name"/>
+        <input class="ef ef-sm" id="e-tool-color-${idx}" value="${x(t.color)}" style="width:76px" placeholder="#hex"/>`;
+          tw.appendChild(row);
+        } else {
+          const el = document.createElement("div");
+          el.className = "tb";
+          el.style.cssText = `background:${t.bg};border:1px solid ${t.color}22;animation-delay:${idx * 45 + 320}ms`;
+          el.innerHTML = `<span class="ti" style="color:${t.color};box-shadow:0 0 8px ${t.color}44">${t.i}</span><span class="tn">${t.name}</span>`;
+          tw.appendChild(el);
+        }
+      });
+      if (E) { const ab = document.createElement("div"); ab.className = "arr-bar"; ab.innerHTML = `<button class="arr-add" onclick="addArr('tools')" title="Add">+</button><span class="arr-lbl">add tool</span>`; tw.appendChild(ab); }
+
+      /* editing border */
+      document.querySelectorAll(".card").forEach(c => c.classList.toggle("editing", E));
+
+      /* render compose box for reviews */
+      renderReviewCompose();
+    }
+
+    /* ════════════════════════════════════════
+       REVIEWS (Feature 4 & 5)
+    ════════════════════════════════════════ */
+    function renderReviewCompose() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const wrap = document.getElementById("rev-compose-wrap");
+      if (!wrap) return;
+      wrap.innerHTML = `
+        <div class="reviews-compose">
+          <div class="reviews-compose-top">
+            <img src="${x(user.photoURL || '')}" class="rev-user-img" onerror="this.src=''" alt=""/>
+            <span class="rev-user-name">${x(user.displayName || user.email)}</span>
+          </div>
+          <textarea class="rev-textarea" id="rev-input" placeholder="Share your thoughts about this portfolio…" rows="3"></textarea>
+          <div class="rev-submit-row">
+            <button class="rev-submit-btn" id="rev-submit-btn">Post Comment</button>
+          </div>
+        </div>
+      `;
+      document.getElementById("rev-submit-btn")?.addEventListener("click", submitReview);
+    }
+
+    async function submitReview() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const text = (document.getElementById("rev-input")?.value || "").trim();
+      if (!text) { toast("Please write something before posting.", "info"); return; }
+      try {
+        const newRef = db.ref("reviews").push();
+        await newRef.set({
+          uid: user.uid,
+          author: user.displayName || user.email,
+          photoURL: user.photoURL || "",
+          text: text,
+          timestamp: Date.now(),
+          reply: null
+        });
+        document.getElementById("rev-input").value = "";
+        toast("✓ Comment posted!", "success");
+      } catch (e) {
+        toast("Failed to post: " + e.message, "error");
+      }
+    }
+
+    function renderReviews(data) {
+      const list = document.getElementById("rev-list");
+      if (!list) return;
+      if (!data) {
+        list.innerHTML = `<div class="rev-empty">// no comments yet — be the first to leave one</div>`;
+        return;
+      }
+      const entries = Object.entries(data).sort((a, b) => b[1].timestamp - a[1].timestamp);
+      list.innerHTML = "";
+      entries.forEach(([key, rev]) => {
+        const item = document.createElement("div");
+        item.className = "rev-item";
+        const timeStr = rev.timestamp ? new Date(rev.timestamp).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+        item.innerHTML = `
+          <div class="rev-header">
+            <img src="${x(rev.photoURL || '')}" class="rev-avatar" onerror="this.src=''" alt=""/>
+            <div class="rev-meta">
+              <div class="rev-author">${x(rev.author || "Anonymous")}</div>
+              <div class="rev-time">${timeStr}</div>
+            </div>
+          </div>
+          <div class="rev-text">${x(rev.text || "")}</div>
+          ${rev.reply ? `
+            <div class="rev-admin-reply">
+              <div class="rev-admin-reply-label">⚡ Admin Reply</div>
+              <div class="rev-admin-reply-text">${x(rev.reply)}</div>
+            </div>
+          ` : ""}
+          ${isAdmin ? `
+            <div class="rev-actions">
+              <button class="rev-action-btn rev-delete-btn" data-key="${key}">🗑 Delete</button>
+              <button class="rev-action-btn rev-reply-btn" data-key="${key}">↩ Reply</button>
+            </div>
+            <div class="rev-reply-box" id="reply-box-${key}">
+              <textarea class="rev-reply-textarea" id="reply-ta-${key}" placeholder="Write a reply…" rows="2">${x(rev.reply || '')}</textarea>
+              <button class="rev-reply-submit" data-key="${key}">Post Reply</button>
+            </div>
+          ` : ""}
+        `;
+        list.appendChild(item);
+      });
+
+      // Attach admin event listeners
+      if (isAdmin) {
+        list.querySelectorAll(".rev-delete-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const key = btn.dataset.key;
+            if (!window.confirm("Delete this comment?")) return;
+            try {
+              await db.ref("reviews/" + key).remove();
+              toast("✓ Comment deleted.", "success");
+            } catch (e) { toast("Delete failed: " + e.message, "error"); }
+          });
+        });
+
+        list.querySelectorAll(".rev-reply-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const key = btn.dataset.key;
+            const box = document.getElementById("reply-box-" + key);
+            if (box) box.classList.toggle("open");
+          });
+        });
+
+        list.querySelectorAll(".rev-reply-submit").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const key = btn.dataset.key;
+            const ta = document.getElementById("reply-ta-" + key);
+            const replyText = (ta?.value || "").trim();
+            if (!replyText) { toast("Reply cannot be empty.", "info"); return; }
+            try {
+              await db.ref("reviews/" + key + "/reply").set(replyText);
+              toast("✓ Reply posted!", "success");
+              const box = document.getElementById("reply-box-" + key);
+              if (box) box.classList.remove("open");
+            } catch (e) { toast("Reply failed: " + e.message, "error"); }
+          });
+        });
+      }
+    }
+
+    /* ════════════════════════════════════════
+       UTILS
+    ════════════════════════════════════════ */
+    function s(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+    function x(v) { return String(v || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+    function toast(msg, type = "info") {
+      const t = document.createElement("div");
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      requestAnimationFrame(() => t.classList.add("in"));
+      setTimeout(() => { t.classList.remove("in"); setTimeout(() => t.remove(), 350); }, 3000);
+    }
+
+    /* ════════════════════════════════════════
+       DYNAMIC ARRAY MANAGEMENT
+    ════════════════════════════════════════ */
+    const ARR_TEMPLATES = {
+      experience: { role: "New Role", company: "Company", period: "Date Range", desc: "Description", accent: "#a78bfa" },
+      projects: { name: "New Project", color: "#a78bfa", stars: 0, desc: "Project description", tags: "Tag1,Tag2" },
+      education: { icon: "🎓", school: "School Name", degree: "Degree", year: "Year", bg: "#0d1a30" },
+      tools: { name: "New Skill", color: "#a78bfa", bg: "#1a1035", i: "?" }
+    };
+
+    function syncFromInputs() {
+      if (!portData || !editMode) return;
+      (portData.experience || []).forEach((ex, i) => {
+        ex.role = g(`e-exp-role-${i}`) || ex.role;
+        ex.company = g(`e-exp-co-${i}`) || ex.company;
+        ex.period = g(`e-exp-per-${i}`) || ex.period;
+        ex.desc = g(`e-exp-desc-${i}`) || ex.desc;
+        ex.accent = g(`e-exp-accent-${i}`) || ex.accent;
+      });
+      (portData.projects || []).forEach((p, i) => {
+        p.name = g(`e-proj-name-${i}`) || p.name;
+        p.desc = g(`e-proj-desc-${i}`) || p.desc;
+        p.tags = g(`e-proj-tags-${i}`) || p.tags;
+        p.stars = parseInt(g(`e-proj-stars-${i}`)) || p.stars;
+        p.color = g(`e-proj-color-${i}`) || p.color;
+      });
+      (portData.education || []).forEach((e, i) => {
+        e.icon = g(`e-edu-icon-${i}`) || e.icon;
+        e.school = g(`e-edu-school-${i}`) || e.school;
+        e.degree = g(`e-edu-deg-${i}`) || e.degree;
+        e.year = g(`e-edu-year-${i}`) || e.year;
+      });
+      (portData.tools || []).forEach((t, i) => {
+        t.name = g(`e-tool-name-${i}`) || t.name;
+        t.i = g(`e-tool-i-${i}`) || t.i;
+        t.color = g(`e-tool-color-${i}`) || t.color;
+      });
+    }
+
+    function addArr(key) {
+      syncFromInputs();
+      if (!portData[key]) portData[key] = [];
+      portData[key].push({ ...ARR_TEMPLATES[key] });
+      render();
+    }
+
+    function delArr(key, idx) {
+      syncFromInputs();
+      if (!portData[key]) return;
+      portData[key].splice(idx, 1);
+      render();
+    }
+
+    /* Expose to window so inline onclick="addArr(...)" / onclick="delArr(...)" work */
+    window.addArr = addArr;
+    window.delArr = delArr;
+  </script>
+</body>
+
+</html>
